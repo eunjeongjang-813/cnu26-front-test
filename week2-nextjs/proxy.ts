@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // ============================================================
-// [실습 2] 미들웨어: 인증되지 않은 사용자를 /login으로 리다이렉트
+// [Next.js 16 변경사항] middleware.ts → proxy.ts
+//   - 파일명: middleware.ts → proxy.ts
+//   - export 함수명: middleware → proxy
+//   - Next.js 15까지는 middleware.ts / export function middleware() 였음
+//
+// [실습 2] 프록시: 인증되지 않은 사용자를 /login으로 리다이렉트
 //
 // 흐름:
 // 1. 요청 쿠키에서 'token'을 읽는다
@@ -10,7 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // 4. 토큰 있는데 /login 접근 → /shop 으로 리다이렉트
 // ============================================================
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // request.cookies.get('token')?.value 로 토큰을 읽어오세요
   const token = request.cookies.get('token')?.value; // TODO
   const { pathname } = request.nextUrl;

@@ -34,9 +34,9 @@
 java -version
 # → openjdk version "21.x.x" 이어야 함
 
-# Node.js 18 이상 확인
+# Node.js 22 LTS 이상 확인 (Next.js 16 최소 요구사항 v20.9+, 권장 v22 LTS)
 node -v
-# → v18.x.x 또는 v20.x.x 이어야 함
+# → v22.x.x (LTS) 이어야 함
 
 # npm 확인
 npm -v

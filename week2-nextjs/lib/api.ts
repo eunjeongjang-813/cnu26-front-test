@@ -1,7 +1,12 @@
 // 서버 사이드 API 호출 함수 모음
 // 서버 컴포넌트와 Route Handler에서 사용 (클라이언트 X)
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
+// 서버(Server Component, Route Handler): 직접 BE 호출 (CORS 없음)
+// 클라이언트(Client Component): /api 경로로 요청 → next.config.ts rewrites가 BE로 중계
+const BACKEND_URL =
+  typeof window === 'undefined'
+    ? (process.env.BACKEND_URL ?? 'http://localhost:8080')
+    : '/api';
 
 // ============================================================
 // [실습 4] BE API를 서버에서 호출하는 함수들을 구현하세요

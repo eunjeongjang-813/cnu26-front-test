@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // Server Component(ShopPage)에 포함되는 Client Component
 // 검색어 입력 → URL 쿼리 파라미터 업데이트 → 서버에서 새 데이터 패칭 (SSR)
@@ -25,7 +25,9 @@ export default function SearchBar({ defaultQuery }: { defaultQuery: string }) {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="검색어를 입력하세요"
       />
-      <button type="submit" className="btn-primary">검색</button>
+      <button type="submit" className="btn-primary">
+        검색
+      </button>
     </form>
   );
 }
