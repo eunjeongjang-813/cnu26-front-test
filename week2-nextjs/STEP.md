@@ -1,36 +1,46 @@
-# Step 01: 쿠키에서 JWT 토큰 읽기
+# Step 02: 미들웨어 (proxy.ts) — 라우트 보호
 
-> 브랜치: `week2/step-01`
+> 브랜치: `week2/step-02`
 
 ## 학습 목표
-- Next.js App Router에서 서버 컴포넌트가 쿠키를 읽는 방법을 이해한다
-- `next/headers`의 `cookies()` API 사용법을 익힌다
+- Next.js 미들웨어로 인증 라우트를 보호하는 방법을 이해한다
+- 조건부 리다이렉트 패턴을 익힌다
 
 ## 핵심 개념
-- `cookies()` from `next/headers`: 서버 컴포넌트 전용 쿠키 접근 API
-- Optional chaining `?.value`: 쿠키가 없을 때 undefined 반환
-- Week 1에서는 `localStorage.getItem('token')`, Week 2에서는 `cookies()`
+- `proxy.ts` (Next.js 16) = `middleware.ts` (Next.js 15 이하)
+- `request.cookies.get('token')?.value`: 요청 쿠키에서 토큰 읽기
+- `NextResponse.redirect()`: 서버 측 리다이렉트
 
 ## 구현
 
-`lib/auth.ts`의 TODO를 완성하세요:
+`proxy.ts`의 TODO 3곳을 완성하세요:
 
 ```ts
-const cookieStore = await cookies();
-return cookieStore.get('token')?.value;
+// 1. 토큰 읽기
+const token = request.cookies.get('token')?.value;
+
+// 2. 미인증 → 로그인 페이지로
+if (!token && !isLoginPage) {
+  return NextResponse.redirect(new URL('/login', request.url));
+}
+
+// 3. 인증됨 → 로그인 페이지 접근 차단
+if (token && isLoginPage) {
+  return NextResponse.redirect(new URL('/shop', request.url));
+}
 ```
 
 ## 전체 흐름
 
 ```
-브라우저 → 쿠키에 token 포함 → Next.js Server Component
-→ getTokenFromCookie() → cookies().get('token')?.value
-→ 토큰 문자열 반환 (없으면 undefined)
+브라우저 → /shop 요청 → proxy.ts 실행
+→ 쿠키에 token 없음 → /login 리다이렉트
+→ 쿠키에 token 있음 → 요청 통과 → ShopPage 렌더링
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `lib/auth.ts` — 서버 전용 쿠키 인증 헬퍼
+- `proxy.ts` — 인증 미들웨어 (모든 보호된 라우트에 자동 적용)
 
 ## 생각해볼 점
-- 왜 Week 1은 localStorage, Week 2는 쿠키를 사용할까?
-- Server Component에서 쿠키를 읽을 수 있는 이유는?
+- `matcher` 배열에 없는 경로(예: `/`)는 미들웨어가 실행되지 않는다. 왜 그렇게 설계했을까?
+- 미들웨어에서 DB를 조회하면 어떤 문제가 생길까?

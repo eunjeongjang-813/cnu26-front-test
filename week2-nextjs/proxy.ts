@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 // [Next.js 16 변경사항] middleware.ts → proxy.ts
 //   - 파일명: middleware.ts → proxy.ts
 //   - export 함수명: middleware → proxy
-//   - Next.js 15까지는 middleware.ts / export function middleware() 였음
 //
 // [실습 2] 프록시: 인증되지 않은 사용자를 /login으로 리다이렉트
 //
@@ -16,26 +15,21 @@ import { NextRequest, NextResponse } from 'next/server';
 // ============================================================
 
 export function proxy(request: NextRequest) {
-  // request.cookies.get('token')?.value 로 토큰을 읽어오세요
-  const token = request.cookies.get('token')?.value; // TODO
+  // TODO [실습 2-a]: request.cookies.get('token')?.value 로 토큰을 읽어오세요
+  const token = undefined;
   const { pathname } = request.nextUrl;
 
   const isLoginPage = pathname === '/login';
 
-  // TODO: 토큰이 없고, 로그인 페이지가 아닌 경우 → /login 으로 리다이렉트
-  if (!token && !isLoginPage) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+  // TODO [실습 2-b]: 토큰이 없고, 로그인 페이지가 아닌 경우 → /login 으로 리다이렉트
+  // NextResponse.redirect(new URL('/login', request.url))
 
-  // TODO: 토큰이 있는데 /login 에 접근한 경우 → /shop 으로 리다이렉트
-  if (token && isLoginPage) {
-    return NextResponse.redirect(new URL('/shop', request.url));
-  }
+  // TODO [실습 2-c]: 토큰이 있는데 /login 에 접근한 경우 → /shop 으로 리다이렉트
+  // NextResponse.redirect(new URL('/shop', request.url))
 
   return NextResponse.next();
 }
 
-// 미들웨어를 적용할 경로 - /shop, /cart, /orders, /login 에만 적용
 export const config = {
   matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
 };
