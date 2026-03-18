@@ -65,10 +65,9 @@ export function useAuth() {
     //   마지막으로 setUser(foundUser)로 상태를 업데이트해야
     //   React가 리렌더링되어 UI가 로그인 상태로 전환됩니다.
     // ============================================================
-    // TODO [실습 4-b]: 아래 3단계를 구현하세요
-    // 1. loginWithUserId(foundUser.id) 로 { token } 받기
-    // 2. localStorage.setItem('token', token) 으로 저장
-    // 3. setUser(foundUser) 로 상태 업데이트
+    const { token } = await loginWithUserId(foundUser.id); // TODO: 아래 두 줄 구현
+    localStorage.setItem('token', token);
+    setUser(foundUser);
   };
 
   // ============================================================
@@ -91,9 +90,8 @@ export function useAuth() {
   //   순서는 바뀌어도 동작하지만, 저장소 정리 → 상태 초기화 순서가 관례적입니다.
   // ============================================================
   const logout = () => {
-    // TODO [실습 4-c]: 로그아웃 구현
-    // 1. localStorage.removeItem('token')
-    // 2. setUser(null)
+    localStorage.removeItem('token'); // TODO
+    setUser(null);
   };
 
   return {
