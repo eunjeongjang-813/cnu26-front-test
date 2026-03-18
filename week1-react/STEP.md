@@ -1,40 +1,36 @@
-# Step 02: 인증 API 함수 — 회원가입 & 로그인
+# Step 03: 상품 검색 API
 
-> 브랜치: `week1/step-02`
+> 브랜치: `week1/step-03`
 
 ## 학습 목표
-- REST API POST 요청을 함수로 추상화하는 방법을 익힌다
-- 회원가입/로그인 플로우를 이해한다
+- GET 요청에서 query parameter를 올바르게 인코딩하는 방법을 익힌다
+- 템플릿 리터럴로 동적 URL을 만드는 패턴을 이해한다
 
 ## 핵심 개념
-- `post(path, body)`: client.js의 공통 POST 함수
-- JWT 발급 흐름: userId → POST /users/login → { token }
+- `get(path)`: client.js의 공통 GET 함수
+- `encodeURIComponent()`: 한글/특수문자를 URL-safe 형태로 변환
+- 템플릿 리터럴: `` `/shop/search?query=${...}` ``
 
 ## 구현
 
-`src/api/auth.js`의 TODO 2곳을 완성하세요:
+`src/api/shop.js`의 TODO를 완성하세요:
 
-1. 회원가입:
 ```js
-return post('/users', { name, email });
-```
-
-2. 로그인 (토큰 발급):
-```js
-return post('/users/login', { userId });
+return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
 ```
 
 ## 전체 흐름
 
 ```
-findUserByName(name) → 없으면 signUp(name, email)
-→ loginWithUserId(user.id) → { token }
-→ localStorage.setItem('token', token)
+ProductList → searchProducts('맥북')
+→ GET /api/shop/search?query=%EB%A7%A5%EB%B6%81&display=12
+→ Vite proxy → http://localhost:8080/shop/search?...
+→ 네이버 쇼핑 API 결과 반환
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `src/api/auth.js` — 인증 관련 API 함수 (회원가입, 로그인)
+- `src/api/shop.js` — 상품 검색 API 함수
 
 ## 생각해볼 점
-- 왜 로그인 API는 비밀번호 대신 userId를 사용할까?
-- `post()` 함수 내부에서 `JSON.stringify(body)`를 하는 이유는?
+- `encodeURIComponent('맥북')`의 결과는 무엇인가?
+- 인코딩 없이 한글을 URL에 넣으면 어떻게 될까?
