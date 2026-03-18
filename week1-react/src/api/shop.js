@@ -20,7 +20,5 @@ export async function searchProducts(query, display = 12) {
   //   display 파라미터는 검색 결과 개수를 조절하며 기본값은 12개입니다.
   //   템플릿 리터럴(``)을 사용해 경로와 파라미터를 깔끔하게 조합합니다.
   // ============================================================
-  // TODO: GET /shop/search?query=...&display=... 를 호출하세요
-  // 힌트: get() 함수와 encodeURIComponent()를 사용하세요
-  // 힌트: return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
+  return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
 }

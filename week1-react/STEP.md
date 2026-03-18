@@ -1,36 +1,53 @@
-# Step 03: 상품 검색 API
+# Step 04: useAuth 훅 — 로그인 & 로그아웃 상태 관리
 
-> 브랜치: `week1/step-03`
+> 브랜치: `week1/step-04`
 
 ## 학습 목표
-- GET 요청에서 query parameter를 올바르게 인코딩하는 방법을 익힌다
-- 템플릿 리터럴로 동적 URL을 만드는 패턴을 이해한다
+- 커스텀 훅으로 인증 상태를 캡슐화하는 패턴을 이해한다
+- async/await로 비동기 로그인 플로우를 구현한다
+- localStorage와 React 상태를 함께 관리하는 방법을 익힌다
 
 ## 핵심 개념
-- `get(path)`: client.js의 공통 GET 함수
-- `encodeURIComponent()`: 한글/특수문자를 URL-safe 형태로 변환
-- 템플릿 리터럴: `` `/shop/search?query=${...}` ``
+- `useState(null)`: 초기값이 null인 user 상태 (null = 비로그인)
+- `async/await`: 비동기 API 호출을 순서대로 처리
+- 구조 분해 할당: `const { token } = await loginWithUserId(...)`
 
 ## 구현
 
-`src/api/shop.js`의 TODO를 완성하세요:
+`src/hooks/useAuth.js`의 TODO 2곳을 완성하세요:
+
+### TODO [실습 4-b]: login 함수 내부
 
 ```js
-return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
+const { token } = await loginWithUserId(foundUser.id);
+localStorage.setItem('token', token);
+setUser(foundUser);
+```
+
+### TODO [실습 4-c]: logout 함수 내부
+
+```js
+localStorage.removeItem('token');
+setUser(null);
 ```
 
 ## 전체 흐름
 
 ```
-ProductList → searchProducts('맥북')
-→ GET /api/shop/search?query=%EB%A7%A5%EB%B6%81&display=12
-→ Vite proxy → http://localhost:8080/shop/search?...
-→ 네이버 쇼핑 API 결과 반환
+login(name, email) 호출
+→ findUserByName(name) → 없으면 signUp()
+→ loginWithUserId(id) → { token }
+→ localStorage.setItem('token', token)
+→ setUser(foundUser) → 리렌더링 → UI가 로그인 상태로 전환
+
+logout() 호출
+→ localStorage.removeItem('token')
+→ setUser(null) → 리렌더링 → UI가 로그인 폼으로 전환
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `src/api/shop.js` — 상품 검색 API 함수
+- `src/hooks/useAuth.js` — 인증 상태 관리 커스텀 훅
 
 ## 생각해볼 점
-- `encodeURIComponent('맥북')`의 결과는 무엇인가?
-- 인코딩 없이 한글을 URL에 넣으면 어떻게 될까?
+- `setUser(foundUser)` 없이 localStorage에만 저장하면 UI는 어떻게 될까?
+- 새로고침 후에도 로그인 상태가 유지되는 이유는? (useEffect 자동복원 로직 참고)
