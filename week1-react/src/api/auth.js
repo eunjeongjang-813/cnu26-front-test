@@ -25,7 +25,9 @@ export async function signUp(name, email) {
   //   서버는 생성된 유저 { id, name, email }를 반환하고,
   //   이 반환값이 useAuth.js의 foundUser 변수에 담깁니다.
   // ============================================================
-  return post('/users', { name, email }); // TODO: 직접 구현해보세요
+  // TODO: POST /users 로 회원가입 요청을 보내세요
+  // body: { name, email } → 반환값: { id, name, email }
+  // 힌트: return post('/users', { name, email });
 }
 
 // 로그인: userId로 JWT 토큰 발급
@@ -44,7 +46,9 @@ export async function loginWithUserId(userId) {
   //   localStorage.setItem('token', token)으로 저장됩니다.
   //   이후 모든 API 요청 시 client.js의 Authorization 헤더에 자동으로 포함됩니다.
   // ============================================================
-  return post('/users/login', { userId }); // TODO: 직접 구현해보세요
+  // TODO: POST /users/login 으로 토큰을 발급받으세요
+  // body: { userId } → 반환값: { token }
+  // 힌트: return post('/users/login', { userId });
 }
 
 // 내 정보 조회 (토큰 필요 - client.js에서 자동으로 헤더에 포함)

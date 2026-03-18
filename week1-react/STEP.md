@@ -1,40 +1,40 @@
-# Step 01: API 클라이언트 — localStorage 토큰 인증
+# Step 02: 인증 API 함수 — 회원가입 & 로그인
 
-> 브랜치: `week1/step-01`
+> 브랜치: `week1/step-02`
 
 ## 학습 목표
-- localStorage에서 JWT 토큰을 읽는 방법을 이해한다
-- 조건부 헤더 추가 패턴(스프레드 + 단축 평가)을 익힌다
+- REST API POST 요청을 함수로 추상화하는 방법을 익힌다
+- 회원가입/로그인 플로우를 이해한다
 
 ## 핵심 개념
-- `localStorage.getItem('token')`: 브라우저에 저장된 토큰 읽기
-- 스프레드 연산자 `...`와 단축 평가 `&&`로 조건부 헤더 추가
+- `post(path, body)`: client.js의 공통 POST 함수
+- JWT 발급 흐름: userId → POST /users/login → { token }
 
 ## 구현
 
-`src/api/client.js`의 TODO 2곳을 완성하세요:
+`src/api/auth.js`의 TODO 2곳을 완성하세요:
 
-1. localStorage에서 토큰 읽기:
+1. 회원가입:
 ```js
-const token = localStorage.getItem('token');
+return post('/users', { name, email });
 ```
 
-2. 토큰이 있을 때만 Authorization 헤더 추가:
+2. 로그인 (토큰 발급):
 ```js
-...(token && { Authorization: `Bearer ${token}` }),
+return post('/users/login', { userId });
 ```
 
 ## 전체 흐름
 
 ```
-사용자 로그인 → localStorage에 token 저장
-→ 이후 모든 API 요청: client.js가 token을 자동으로 Authorization 헤더에 추가
-→ 서버: Bearer 토큰 검증 후 응답
+findUserByName(name) → 없으면 signUp(name, email)
+→ loginWithUserId(user.id) → { token }
+→ localStorage.setItem('token', token)
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `src/api/client.js` — 공통 HTTP 클라이언트 (토큰 인증 로직)
+- `src/api/auth.js` — 인증 관련 API 함수 (회원가입, 로그인)
 
 ## 생각해볼 점
-- 토큰이 없을 때 (`null`) 헤더에 `Authorization: Bearer null`이 들어가면 어떤 문제가 생길까?
-- `&&` 단축 평가로 이를 어떻게 방지하는가?
+- 왜 로그인 API는 비밀번호 대신 userId를 사용할까?
+- `post()` 함수 내부에서 `JSON.stringify(body)`를 하는 이유는?

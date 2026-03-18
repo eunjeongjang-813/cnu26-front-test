@@ -17,7 +17,7 @@ async function request(path, options = {}) {
   //   초기값을 null로 두면 토큰 없이도 API 요청이 가능하지만,
   //   인증이 필요한 엔드포인트(/users/me 등)는 서버에서 401 에러를 반환합니다.
   // ============================================================
-  const token = null; // TODO: localStorage.getItem('token') 으로 교체하세요
+  const token = localStorage.getItem("token");
 
   const headers = {
     "Content-Type": "application/json",
@@ -32,8 +32,7 @@ async function request(path, options = {}) {
     //   → token이 null/undefined/'' 이면 false로 평가되어 아무것도 스프레드되지 않음
     //   → token이 있으면 { Authorization: 'Bearer xxx' } 객체가 스프레드되어 헤더에 추가됨
     //   이 패턴으로 토큰 유무에 따라 조건부로 헤더를 추가할 수 있습니다.
-    // TODO: 토큰이 있을 때만 Authorization 헤더를 추가하세요
-    // 힌트: ...(token && { Authorization: `Bearer ${token}` })
+    ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
 
