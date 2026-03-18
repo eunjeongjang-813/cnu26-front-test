@@ -8,11 +8,9 @@
 // - 쿠키, 환경변수(비밀값)에 안전하게 접근 가능
 // ============================================================
 
-// TODO [실습 5-a, 5-b] 구현 후 아래 주석을 해제하세요:
-// import { redirect } from 'next/navigation';
-// import { searchProducts } from '@/lib/api';
-// import { getTokenFromCookie, getMe } from '@/lib/auth-server';
-import { ShoppingItem } from '@/lib/api';
+import { redirect } from 'next/navigation';
+import { searchProducts } from '@/lib/api';
+import { getTokenFromCookie, getMe } from '@/lib/auth-server';
 import ProductCard from '@/components/ProductCard';
 import SearchBar from '@/components/SearchBar';
 import LogoutButton from '@/components/LogoutButton';
@@ -28,14 +26,21 @@ export default async function ShopPage({
   const params = await searchParams;
   const query = params.query ?? '맥북';
 
-  // TODO [실습 5-a]: 쿠키에서 토큰을 읽고, 없으면 /login으로 리다이렉트
-  // const token = await getTokenFromCookie();
-  // if (!token) redirect('/login');
+  // ============================================================
+  // [실습 5-a] 쿠키에서 토큰을 읽고, 없으면 /login으로 리다이렉트
+  // (middleware에서 이미 처리되지만, 방어적으로 한 번 더 체크)
+  // ============================================================
+  const token = await getTokenFromCookie();
+  if (!token) redirect('/login');
 
-  // TODO [실습 5-b]: 병렬로 유저 정보와 상품 목록을 패칭하세요
+  // ============================================================
+  // [실습 5-b] 병렬로 유저 정보와 상품 목록을 패칭하세요
   // 힌트: Promise.all([getMe(token), searchProducts(query)])
-  const user = { name: '학생' }; // TODO: 실제 구현으로 교체
-  const products: ShoppingItem[] = []; // TODO: 실제 구현으로 교체
+  // ============================================================
+  const [user, products] = await Promise.all([
+    getMe(token),
+    searchProducts(query),
+  ]);
 
   return (
     <div>

@@ -14,11 +14,10 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080';
 
 // POST /api/orders - 주문 생성
 export async function POST(request: NextRequest) {
-  // ============================================================
-  // [실습 6-a] 쿠키에서 토큰을 읽어오세요
-  // ============================================================
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value; // TODO
+  // TODO [실습 6-a]: 쿠키에서 토큰을 읽어오세요
+  // const cookieStore = await cookies();
+  // const token = cookieStore.get('token')?.value;
+  const token = undefined; // TODO: 위 코드로 구현하세요
 
   if (!token) {
     return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 });

@@ -1,44 +1,40 @@
-# Step 05: Shop 페이지 — Server Component SSR
+# Step 06: Route Handler — 주문 API 프록시
 
-> 브랜치: `week2/step-05`
+> 브랜치: `week2/step-06`
 
 ## 학습 목표
-- `async` Server Component에서 데이터를 SSR로 가져오는 패턴을 익힌다
-- `Promise.all`로 여러 API를 병렬 호출하는 방법을 이해한다
+- Next.js Route Handler(app/api/*/route.ts)의 구조를 이해한다
+- Route Handler에서 쿠키를 읽고 인증을 처리하는 방법을 익힌다
 
 ## 핵심 개념
-- Server Component: `'use client'` 없이 `async/await` 직접 사용 가능
-- `redirect()`: 서버에서 조건부 페이지 이동
-- `Promise.all([a, b])`: a와 b를 동시에 시작해 둘 다 완료되면 반환
+- Route Handler: `app/api/*/route.ts`에 HTTP 메서드별 함수를 export
+- 서버에서만 실행 → 토큰, 환경변수가 클라이언트에 노출 안 됨
+- `cookies()` from `next/headers`: Route Handler에서도 사용 가능
 
 ## 구현
 
-`app/shop/page.tsx`의 TODO 2곳을 완성하세요:
+`app/api/orders/route.ts`의 TODO를 완성하세요:
 
 ```ts
-// 5-a: 토큰 확인 및 리다이렉트
-const token = await getTokenFromCookie();
-if (!token) redirect('/login');
-
-// 5-b: 병렬 데이터 패칭
-const [user, products] = await Promise.all([
-  getMe(token),
-  searchProducts(query),
-]);
+// 6-a: 쿠키에서 토큰 읽기
+const cookieStore = await cookies();
+const token = cookieStore.get('token')?.value;
 ```
+
+> 참고: BE가 미완성이므로 실제 주문 저장은 Mock 응답을 반환합니다.
+> `/* 실제 BE 완성 후 ... */` 주석 부분은 나중에 교체 예정입니다.
 
 ## 전체 흐름
 
 ```
-브라우저 → GET /shop?query=맥북
-→ proxy.ts: 쿠키 확인 통과
-→ ShopPage (Server Component): getTokenFromCookie() + Promise.all
-→ HTML 렌더링 후 브라우저로 전송
+CartPage(Client) → POST /api/orders (Route Handler)
+→ 쿠키에서 token 읽기 → BE로 프록시 (또는 Mock)
+→ 주문 생성 완료 → { id, productId, ... } 반환
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `app/shop/page.tsx` — 상품 목록 페이지 (Server Component)
+- `app/api/orders/route.ts` — 주문 생성/조회 Route Handler
 
 ## 생각해볼 점
-- `Promise.all` vs 순차 `await`의 성능 차이는?
-- proxy.ts에서 이미 인증을 체크하는데, 왜 ShopPage에서도 다시 체크할까?
+- Client Component에서 직접 백엔드를 호출하지 않고 Route Handler를 거치는 이유는?
+- Route Handler와 Server Component의 차이는?
