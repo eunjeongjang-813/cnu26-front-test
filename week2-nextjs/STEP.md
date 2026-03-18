@@ -1,50 +1,44 @@
-# Step 04: 서버 API 함수 — BACKEND_URL로 직접 호출
+# Step 05: Shop 페이지 — Server Component SSR
 
-> 브랜치: `week2/step-04`
+> 브랜치: `week2/step-05`
 
 ## 학습 목표
-- Server Component에서 백엔드 API를 직접 호출하는 패턴을 익힌다
-- ISR(Incremental Static Regeneration)의 `revalidate` 옵션을 이해한다
-- `cache: 'no-store'` vs `revalidate`의 차이를 이해한다
+- `async` Server Component에서 데이터를 SSR로 가져오는 패턴을 익힌다
+- `Promise.all`로 여러 API를 병렬 호출하는 방법을 이해한다
 
 ## 핵심 개념
-- `BACKEND_URL`: 서버 전용 환경변수 (클라이언트에 노출 X)
-- `next: { revalidate: 60 }`: 60초마다 캐시 갱신 (ISR)
-- `cache: 'no-store'`: 매 요청마다 새로 가져옴 (사용자별 데이터)
+- Server Component: `'use client'` 없이 `async/await` 직접 사용 가능
+- `redirect()`: 서버에서 조건부 페이지 이동
+- `Promise.all([a, b])`: a와 b를 동시에 시작해 둘 다 완료되면 반환
 
 ## 구현
 
-`lib/api.ts`의 TODO 2곳을 완성하세요:
+`app/shop/page.tsx`의 TODO 2곳을 완성하세요:
 
 ```ts
-// 4-a: 상품 검색 (ISR)
-const res = await fetch(
-  `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`,
-  { next: { revalidate: 60 } }
-);
-if (!res.ok) throw new Error('상품 검색 실패');
-return res.json();
+// 5-a: 토큰 확인 및 리다이렉트
+const token = await getTokenFromCookie();
+if (!token) redirect('/login');
 
-// 4-b: 내 정보 (SSR, 항상 최신)
-const res = await fetch(`${BACKEND_URL}/users/me`, {
-  headers: { Authorization: `Bearer ${token}` },
-  cache: 'no-store',
-});
-if (!res.ok) throw new Error('사용자 정보 조회 실패');
-return res.json();
+// 5-b: 병렬 데이터 패칭
+const [user, products] = await Promise.all([
+  getMe(token),
+  searchProducts(query),
+]);
 ```
 
 ## 전체 흐름
 
 ```
-Server Component → searchProducts('맥북')
-→ fetch(`http://localhost:8080/shop/search?query=...`, { revalidate: 60 })
-→ Next.js 캐시 확인 → 60초 이내면 캐시 반환, 아니면 BE 호출
+브라우저 → GET /shop?query=맥북
+→ proxy.ts: 쿠키 확인 통과
+→ ShopPage (Server Component): getTokenFromCookie() + Promise.all
+→ HTML 렌더링 후 브라우저로 전송
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `lib/api.ts` — 서버 사이드 API 호출 함수 모음
+- `app/shop/page.tsx` — 상품 목록 페이지 (Server Component)
 
 ## 생각해볼 점
-- `BACKEND_URL`에 `NEXT_PUBLIC_` 접두사가 없는 이유는?
-- 상품 검색은 ISR, 사용자 정보는 `no-store`인 이유는?
+- `Promise.all` vs 순차 `await`의 성능 차이는?
+- proxy.ts에서 이미 인증을 체크하는데, 왜 ShopPage에서도 다시 체크할까?
