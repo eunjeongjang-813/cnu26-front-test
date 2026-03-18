@@ -12,9 +12,9 @@ export default function ProductList() {
   // - error: 오류 메시지 (초기값: null)
   //
   // ✅ 모범 정답:
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  //   const [products, setProducts] = useState([]);
+  //   const [loading, setLoading] = useState(true);
+  //   const [error, setError] = useState(null);
   //
   // 📝 해설:
   //   - products: API 응답 배열을 담으므로 초기값을 [] 로 설정합니다.
@@ -23,6 +23,7 @@ export default function ProductList() {
   //     false로 설정하면 데이터 로딩 전에 빈 목록이 잠깐 보이는 깜빡임이 생깁니다.
   //   - error: 오류가 없으면 null, 있으면 오류 메시지 문자열로 사용합니다.
   // ============================================================
+  // TODO [실습 6-a]: 아래 3가지 상태를 useState로 선언하세요
   // const [products, setProducts] = useState([]); // TODO
   // const [loading, setLoading] = useState(true); // TODO
   // const [error, setError] = useState(null); // TODO
@@ -81,20 +82,10 @@ export default function ProductList() {
   //   }, [query]);
   //   (useEffect의 콜백은 직접 async 함수가 될 수 없으므로 내부 함수를 선언해서 호출합니다)
   // ============================================================
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-
-    searchProducts(query)
-      .then((data) => {
-        setProducts(data); // TODO: 이 부분을 직접 작성해보세요
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [query]); // TODO: 의존성 배열
+  // TODO [실습 6-b]: useEffect를 작성해 상품을 불러오세요
+  // useEffect(() => {
+  //   ...
+  // }, [query]);
 
   const handleSearch = (e) => {
     e.preventDefault();

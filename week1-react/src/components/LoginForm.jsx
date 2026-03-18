@@ -23,10 +23,9 @@ export default function LoginForm({ onLogin }) {
   //   각 input의 value={name}과 onChange={(e) => setName(e.target.value)}를 연결해야
   //   React가 입력값을 완전히 제어하는 "제어 컴포넌트"가 됩니다.
   // ============================================================
-  // TODO [실습 5]: 아래 3가지 상태를 useState로 선언하세요 (초기값 주의!)
-  // const [name, setName] = useState('');
-  // const [email, setEmail] = useState('');
-  // const [error, setError] = useState(null);
+  const [name, setName] = useState('');       // TODO
+  const [email, setEmail] = useState('');     // TODO
+  const [error, setError] = useState(null);   // TODO
   const [loading, setLoading] = useState(false);
   const [needEmail, setNeedEmail] = useState(false);
 
@@ -80,10 +79,11 @@ export default function LoginForm({ onLogin }) {
                   value만 연결하고 onChange를 빠뜨리면 input이 읽기 전용이 되어
                   아무리 타이핑해도 값이 변하지 않습니다.
                 ============================================================ */}
-            {/* TODO [실습 5 - 연결]: 아래 input에 value={name} 과 onChange={(e) => setName(e.target.value)} 를 추가하세요 */}
             <input
               id="name"
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="예: 홍길동"
               disabled={loading}
             />
