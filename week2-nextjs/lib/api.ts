@@ -47,30 +47,23 @@ export interface Order {
 
 // 상품 검색 (SSR/ISR용)
 // GET /shop/search?query=맥북&display=12
-export async function searchProducts(query: string, display = 12): Promise<ShoppingItem[]> {
-  // ============================================================
-  // TODO: BACKEND_URL을 사용해 BE API를 호출하세요
-  // 힌트: next: { revalidate: 60 } 옵션으로 ISR 적용
-  // ============================================================
-  const res = await fetch(
-    `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`,
-    { next: { revalidate: 60 } } // 60초마다 갱신 (ISR)
-  );
-
-  if (!res.ok) throw new Error('상품 검색 실패');
-  return res.json();
+export async function searchProducts(_query: string, _display = 12): Promise<ShoppingItem[]> {
+  // TODO [실습 4-a]: BACKEND_URL을 사용해 상품 검색 API를 호출하세요
+  // - URL: `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`
+  // - fetch 옵션: { next: { revalidate: 60 } }  ← ISR: 60초마다 재검증
+  // - 실패 시: throw new Error('상품 검색 실패')
+  // - 반환: res.json()
+  throw new Error('searchProducts: 아직 구현되지 않았습니다');
 }
 
 // 내 정보 조회 (SSR용 - 토큰 필요)
 // GET /users/me
-export async function getMe(token: string): Promise<User> {
-  const res = await fetch(`${BACKEND_URL}/users/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store', // 항상 최신 정보
-  });
-
-  if (!res.ok) throw new Error('사용자 정보 조회 실패');
-  return res.json();
+export async function getMe(_token: string): Promise<User> {
+  // TODO [실습 4-b]: /users/me 엔드포인트를 호출하세요
+  // - Authorization 헤더에 token 포함: `Bearer ${token}`
+  // - cache: 'no-store' (항상 최신 정보)
+  // - 실패 시: throw new Error('사용자 정보 조회 실패')
+  throw new Error('getMe: 아직 구현되지 않았습니다');
 }
 
 // 이름으로 유저 검색
@@ -80,8 +73,8 @@ export async function findUserByName(name: string): Promise<User | null> {
     { cache: 'no-store' }
   );
   if (!res.ok) return null;
-  const users: User[] = await res.json();
-  return users[0] ?? null;
+  const page: { content: User[] } = await res.json();
+  return page.content[0] ?? null;
 }
 
 // 회원가입

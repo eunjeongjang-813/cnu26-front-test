@@ -11,10 +11,13 @@ import { findUserByName, signUpUser, loginUser } from '@/lib/api';
 export default function LoginPage() {
   const router = useRouter();
 
-  // TODO [실습 3-a]: useState로 name, email, error 상태를 선언하세요
-  // const [name, setName] = useState('');
-  // const [email, setEmail] = useState('');
-  // const [error, setError] = useState<string | null>(null);
+  // ============================================================
+  // [실습 3-a] useState로 name, email, error 상태를 선언하세요
+  // (Week 1과 동일한 패턴)
+  // ============================================================
+  const [name, setName] = useState('');       // TODO
+  const [email, setEmail] = useState('');     // TODO
+  const [error, setError] = useState<string | null>(null);  // TODO
   const [loading, setLoading] = useState(false);
   const [needEmail, setNeedEmail] = useState(false);
 
@@ -48,9 +51,14 @@ export default function LoginPage() {
 
       const { token } = await loginUser(user.id);
 
-      // TODO [실습 3-b]: 토큰을 쿠키에 저장하세요
+      // ============================================================
+      // [실습 3-b] 토큰을 쿠키에 저장하세요
       // Week 1에서는 localStorage를 썼지만, Next.js에서는 쿠키를 사용합니다
+      // 이유: Server Component와 middleware에서 쿠키를 읽을 수 있기 때문
+      //
       // document.cookie = `token=${token}; path=/; max-age=3600`
+      // ============================================================
+      document.cookie = `token=${token}; path=/; max-age=3600`; // TODO
 
       router.push('/shop');
     } catch (err) {

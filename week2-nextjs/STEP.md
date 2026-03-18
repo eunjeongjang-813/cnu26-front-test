@@ -1,41 +1,50 @@
-# Step 03: 로그인 페이지 — Client Component
+# Step 04: 서버 API 함수 — BACKEND_URL로 직접 호출
 
-> 브랜치: `week2/step-03`
+> 브랜치: `week2/step-04`
 
 ## 학습 목표
-- 언제 `'use client'`를 선언해야 하는지 이해한다
-- Next.js에서 localStorage 대신 쿠키를 사용하는 이유를 이해한다
+- Server Component에서 백엔드 API를 직접 호출하는 패턴을 익힌다
+- ISR(Incremental Static Regeneration)의 `revalidate` 옵션을 이해한다
+- `cache: 'no-store'` vs `revalidate`의 차이를 이해한다
 
 ## 핵심 개념
-- `'use client'`: useState, 이벤트 핸들러 사용 시 필요
-- `document.cookie`: 브라우저에서 쿠키 설정
-- `path=/; max-age=3600`: 전체 경로에서 1시간 유효
+- `BACKEND_URL`: 서버 전용 환경변수 (클라이언트에 노출 X)
+- `next: { revalidate: 60 }`: 60초마다 캐시 갱신 (ISR)
+- `cache: 'no-store'`: 매 요청마다 새로 가져옴 (사용자별 데이터)
 
 ## 구현
 
-`app/login/page.tsx`의 TODO 2곳을 완성하세요:
+`lib/api.ts`의 TODO 2곳을 완성하세요:
 
 ```ts
-// 3-a: 상태 선언 (Week 1과 동일한 패턴)
-const [name, setName] = useState('');
-const [email, setEmail] = useState('');
-const [error, setError] = useState<string | null>(null);
+// 4-a: 상품 검색 (ISR)
+const res = await fetch(
+  `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`,
+  { next: { revalidate: 60 } }
+);
+if (!res.ok) throw new Error('상품 검색 실패');
+return res.json();
 
-// 3-b: 토큰을 쿠키에 저장 (localStorage 대신)
-document.cookie = `token=${token}; path=/; max-age=3600`;
+// 4-b: 내 정보 (SSR, 항상 최신)
+const res = await fetch(`${BACKEND_URL}/users/me`, {
+  headers: { Authorization: `Bearer ${token}` },
+  cache: 'no-store',
+});
+if (!res.ok) throw new Error('사용자 정보 조회 실패');
+return res.json();
 ```
 
 ## 전체 흐름
 
 ```
-LoginPage (Client) → loginUser(userId) → { token }
-→ document.cookie = `token=${token}; ...`
-→ router.push('/shop') → proxy.ts가 쿠키 확인 → 통과
+Server Component → searchProducts('맥북')
+→ fetch(`http://localhost:8080/shop/search?query=...`, { revalidate: 60 })
+→ Next.js 캐시 확인 → 60초 이내면 캐시 반환, 아니면 BE 호출
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `app/login/page.tsx` — 로그인 폼 Client Component
+- `lib/api.ts` — 서버 사이드 API 호출 함수 모음
 
 ## 생각해볼 점
-- Server Component에서는 `document.cookie`를 쓸 수 없다. 왜일까?
-- Week 1과 Week 2 로그인의 차이점은 무엇인가?
+- `BACKEND_URL`에 `NEXT_PUBLIC_` 접두사가 없는 이유는?
+- 상품 검색은 ISR, 사용자 정보는 `no-store`인 이유는?
