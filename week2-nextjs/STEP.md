@@ -1,46 +1,41 @@
-# Step 02: 미들웨어 (proxy.ts) — 라우트 보호
+# Step 03: 로그인 페이지 — Client Component
 
-> 브랜치: `week2/step-02`
+> 브랜치: `week2/step-03`
 
 ## 학습 목표
-- Next.js 미들웨어로 인증 라우트를 보호하는 방법을 이해한다
-- 조건부 리다이렉트 패턴을 익힌다
+- 언제 `'use client'`를 선언해야 하는지 이해한다
+- Next.js에서 localStorage 대신 쿠키를 사용하는 이유를 이해한다
 
 ## 핵심 개념
-- `proxy.ts` (Next.js 16) = `middleware.ts` (Next.js 15 이하)
-- `request.cookies.get('token')?.value`: 요청 쿠키에서 토큰 읽기
-- `NextResponse.redirect()`: 서버 측 리다이렉트
+- `'use client'`: useState, 이벤트 핸들러 사용 시 필요
+- `document.cookie`: 브라우저에서 쿠키 설정
+- `path=/; max-age=3600`: 전체 경로에서 1시간 유효
 
 ## 구현
 
-`proxy.ts`의 TODO 3곳을 완성하세요:
+`app/login/page.tsx`의 TODO 2곳을 완성하세요:
 
 ```ts
-// 1. 토큰 읽기
-const token = request.cookies.get('token')?.value;
+// 3-a: 상태 선언 (Week 1과 동일한 패턴)
+const [name, setName] = useState('');
+const [email, setEmail] = useState('');
+const [error, setError] = useState<string | null>(null);
 
-// 2. 미인증 → 로그인 페이지로
-if (!token && !isLoginPage) {
-  return NextResponse.redirect(new URL('/login', request.url));
-}
-
-// 3. 인증됨 → 로그인 페이지 접근 차단
-if (token && isLoginPage) {
-  return NextResponse.redirect(new URL('/shop', request.url));
-}
+// 3-b: 토큰을 쿠키에 저장 (localStorage 대신)
+document.cookie = `token=${token}; path=/; max-age=3600`;
 ```
 
 ## 전체 흐름
 
 ```
-브라우저 → /shop 요청 → proxy.ts 실행
-→ 쿠키에 token 없음 → /login 리다이렉트
-→ 쿠키에 token 있음 → 요청 통과 → ShopPage 렌더링
+LoginPage (Client) → loginUser(userId) → { token }
+→ document.cookie = `token=${token}; ...`
+→ router.push('/shop') → proxy.ts가 쿠키 확인 → 통과
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `proxy.ts` — 인증 미들웨어 (모든 보호된 라우트에 자동 적용)
+- `app/login/page.tsx` — 로그인 폼 Client Component
 
 ## 생각해볼 점
-- `matcher` 배열에 없는 경로(예: `/`)는 미들웨어가 실행되지 않는다. 왜 그렇게 설계했을까?
-- 미들웨어에서 DB를 조회하면 어떤 문제가 생길까?
+- Server Component에서는 `document.cookie`를 쓸 수 없다. 왜일까?
+- Week 1과 Week 2 로그인의 차이점은 무엇인가?
