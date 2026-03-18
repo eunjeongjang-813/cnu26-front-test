@@ -1,40 +1,51 @@
-# Step 07: 주문 목록 페이지 — Server Component SSR
+# Step 08: 장바구니 Context — localStorage 영속성
 
-> 브랜치: `week2/step-07`
+> 브랜치: `week2/step-08`
 
 ## 학습 목표
-- Server Component에서 인증이 필요한 데이터를 SSR로 가져오는 패턴을 익힌다
-- Step 05(ShopPage)와 같은 패턴의 반복으로 SSR을 체득한다
+- React Context로 전역 상태를 관리하는 패턴을 이해한다
+- useState lazy initializer와 useEffect로 localStorage 동기화하는 방법을 익힌다
 
 ## 핵심 개념
-- `cache: 'no-store'` in `getMyOrders`: 사용자별 개인 데이터는 캐시하면 안 됨
-- Server Component + async/await: 데이터 패칭이 서버에서 완료된 후 HTML 전송
+- `createContext` + `useContext`: 전역 상태 공유 (prop drilling 없이)
+- `useState(() => ...)` lazy initializer: 첫 마운트 시 한 번만 실행
+- `useEffect(() => ..., [cart])`: cart 변경 시 localStorage 동기화
 
 ## 구현
 
-`app/orders/page.tsx`의 TODO 2곳을 완성하세요:
+`lib/cart-context.tsx`의 TODO 2곳을 완성하세요:
 
 ```ts
-// 7-a: 토큰 확인
-const token = await getTokenFromCookie();
-if (!token) redirect('/login');
+// 8-a: localStorage에서 초기값 복원
+const [cart, setCart] = useState<CartItem[]>(() => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem('cart');
+    return saved ? (JSON.parse(saved) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+});
 
-// 7-b: 주문 목록 가져오기
-const orders = await getMyOrders(token);
+// 8-b: cart 변경 시 localStorage에 저장
+useEffect(() => {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}, [cart]);
 ```
 
 ## 전체 흐름
 
 ```
-브라우저 → GET /orders
-→ proxy.ts: 쿠키 확인 통과
-→ OrdersPage (Server Component): getTokenFromCookie() + getMyOrders(token)
-→ 주문 목록 HTML 렌더링 후 브라우저로 전송
+앱 시작 → CartProvider 마운트
+→ useState lazy init: localStorage에서 cart 복원
+→ 사용자가 상품 담기 → addToCart() → setCart()
+→ useEffect 실행: localStorage.setItem('cart', ...)
+→ 새로고침 시 다시 복원됨
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `app/orders/page.tsx` — 주문 목록 페이지 (Server Component)
+- `lib/cart-context.tsx` — 장바구니 전역 상태 Context
 
 ## 생각해볼 점
-- ShopPage(Step 05)와 OrdersPage의 구조가 어떻게 같고 다른가?
-- 주문 데이터는 왜 ISR이 아닌 `no-store`(매번 새로 가져옴)를 사용할까?
+- Week 1의 useAuth(localStorage + useState)와 CartContext의 패턴이 어떻게 유사한가?
+- `useCallback`으로 addToCart 등을 감싸는 이유는?
