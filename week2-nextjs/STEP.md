@@ -1,51 +1,43 @@
-# Step 08: 장바구니 Context — localStorage 영속성
+# Step 09: 장바구니 담기 버튼 — useCart 훅 사용
 
-> 브랜치: `week2/step-08`
+> 브랜치: `week2/step-09`
 
 ## 학습 목표
-- React Context로 전역 상태를 관리하는 패턴을 이해한다
-- useState lazy initializer와 useEffect로 localStorage 동기화하는 방법을 익힌다
+- 커스텀 훅(`useCart`)으로 Context 값을 가져오는 방법을 익힌다
+- 클릭 이벤트 후 시각적 피드백을 setTimeout으로 구현한다
 
 ## 핵심 개념
-- `createContext` + `useContext`: 전역 상태 공유 (prop drilling 없이)
-- `useState(() => ...)` lazy initializer: 첫 마운트 시 한 번만 실행
-- `useEffect(() => ..., [cart])`: cart 변경 시 localStorage 동기화
+- `const { addToCart } = useCart()`: Context 커스텀 훅 사용
+- `setAdded(true)` → `setTimeout(() => setAdded(false), 1500)`: 일시적 상태 변화
 
 ## 구현
 
-`lib/cart-context.tsx`의 TODO 2곳을 완성하세요:
+`components/AddToCartButton.tsx`의 TODO 2곳을 완성하세요:
 
 ```ts
-// 8-a: localStorage에서 초기값 복원
-const [cart, setCart] = useState<CartItem[]>(() => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem('cart');
-    return saved ? (JSON.parse(saved) as CartItem[]) : [];
-  } catch {
-    return [];
-  }
-});
+// 9-a: useCart에서 addToCart 가져오기
+const { addToCart } = useCart();
 
-// 8-b: cart 변경 시 localStorage에 저장
-useEffect(() => {
-  localStorage.setItem('cart', JSON.stringify(cart));
-}, [cart]);
+// 9-b: 클릭 핸들러 구현
+const handleAddToCart = () => {
+  addToCart(product);
+  setAdded(true);
+  setTimeout(() => setAdded(false), 1500);
+};
 ```
 
 ## 전체 흐름
 
 ```
-앱 시작 → CartProvider 마운트
-→ useState lazy init: localStorage에서 cart 복원
-→ 사용자가 상품 담기 → addToCart() → setCart()
-→ useEffect 실행: localStorage.setItem('cart', ...)
-→ 새로고침 시 다시 복원됨
+ProductCard → AddToCartButton → [장바구니 담기] 클릭
+→ addToCart(product) → CartContext 상태 업데이트
+→ localStorage에도 자동 저장 (Step 08의 useEffect)
+→ CartCount 뱃지 숫자 변경 (totalCount 구독)
 ```
 
 ## 이번 Step 에서 수정된 파일
-- `lib/cart-context.tsx` — 장바구니 전역 상태 Context
+- `components/AddToCartButton.tsx` — 장바구니 담기 버튼
 
 ## 생각해볼 점
-- Week 1의 useAuth(localStorage + useState)와 CartContext의 패턴이 어떻게 유사한가?
-- `useCallback`으로 addToCart 등을 감싸는 이유는?
+- `useCart()`가 `CartProvider` 밖에서 호출되면 어떻게 되나? (cart-context.tsx 확인)
+- `added` 상태로 버튼을 비활성화하는 이유는?
