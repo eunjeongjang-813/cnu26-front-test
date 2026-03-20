@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 3000,
     proxy: {
       // BE 서버로 프록시 - CORS 문제 해결
       '/api': {
