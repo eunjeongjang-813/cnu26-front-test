@@ -48,6 +48,7 @@ export default async function ShopPage({
         <h1>CNU 쇼핑몰</h1>
         <div className="header-user">
           <span>안녕하세요, {user.name}님!</span>
+          <a href="/orders" className="btn-orders">주문 목록</a>
           <CartCount />
           <LogoutButton />
         </div>
