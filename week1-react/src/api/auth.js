@@ -3,8 +3,8 @@ import { get, post } from './client';
 // 이름으로 유저 검색 → 첫 번째 결과 반환
 export async function findUserByName(name) {
   // GET /users/search?name=홍길동
-  const users = await get(`/users/search?name=${encodeURIComponent(name)}`);
-  return users[0] ?? null;
+  const page = await get(`/users/search?name=${encodeURIComponent(name)}`);
+  return page.content?.[0] ?? null;
 }
 
 // 회원가입: 이름과 이메일로 새 유저 생성
