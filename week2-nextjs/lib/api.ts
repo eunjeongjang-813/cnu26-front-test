@@ -47,14 +47,15 @@ export interface Order {
 
 // 상품 검색 (SSR/ISR용)
 // GET /shop/search?query=맥북&display=12
-export async function searchProducts(query: string, display = 12): Promise<ShoppingItem[]> {
-  // ============================================================
-  // TODO: BACKEND_URL을 사용해 BE API를 호출하세요
-  // 힌트: next: { revalidate: 60 } 옵션으로 ISR 적용
-  // ============================================================
+export async function searchProducts(query: string, display = 12, token?: string): Promise<ShoppingItem[]> {
   const res = await fetch(
     `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`,
-    { next: { revalidate: 60 } } // 60초마다 갱신 (ISR)
+    {
+      next: { revalidate: 60 }, // 60초마다 갱신 (ISR)
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    }
   );
 
   if (!res.ok) throw new Error('상품 검색 실패');
@@ -73,15 +74,15 @@ export async function getMe(token: string): Promise<User> {
   return res.json();
 }
 
-// 이름으로 유저 검색
+// 이름으로 유저 조회 — 없으면 null 반환
 export async function findUserByName(name: string): Promise<User | null> {
   const res = await fetch(
     `${BACKEND_URL}/users/search?name=${encodeURIComponent(name)}`,
     { cache: 'no-store' }
   );
   if (!res.ok) return null;
-  const users: User[] = await res.json();
-  return users[0] ?? null;
+  const page = await res.json();
+  return page.content?.[0] ?? null;
 }
 
 // 회원가입
