@@ -80,8 +80,8 @@ export async function findUserByName(name: string): Promise<User | null> {
     { cache: 'no-store' }
   );
   if (!res.ok) return null;
-  const users: User[] = await res.json();
-  return users[0] ?? null;
+  const page: { content: User[] } = await res.json();
+  return page.content[0] ?? null;
 }
 
 // 회원가입
