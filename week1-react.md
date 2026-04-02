@@ -896,7 +896,7 @@ const isLoggedIn = !!user;
 
 ```
 POST /users              { name, email }    → { id, name, email }  (회원가입)
-GET  /users/search       ?name=홍길동      → User[]               (이름 검색)
+GET  /users/search       ?name=홍길동      → Page<User> (.content[0] 사용)  (이름 검색)
 POST /users/login        { userId }         → { token }            (로그인)
 GET  /users/me           Authorization      → { id, name, email }  (내 정보)
 GET  /shop/search        ?query=&display=   → ShoppingItem[]       (상품 검색)
