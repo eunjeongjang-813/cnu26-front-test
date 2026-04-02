@@ -47,34 +47,42 @@ export interface Order {
 
 // 상품 검색 (SSR/ISR용)
 // GET /shop/search?query=맥북&display=12
-export async function searchProducts(_query: string, _display = 12): Promise<ShoppingItem[]> {
-  // TODO [실습 4-a]: BACKEND_URL을 사용해 상품 검색 API를 호출하세요
-  // - URL: `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`
-  // - fetch 옵션: { next: { revalidate: 60 } }  ← ISR: 60초마다 재검증
-  // - 실패 시: throw new Error('상품 검색 실패')
-  // - 반환: res.json()
-  throw new Error('searchProducts: 아직 구현되지 않았습니다');
+export async function searchProducts(query: string, display = 12, token?: string): Promise<ShoppingItem[]> {
+  const res = await fetch(
+    `${BACKEND_URL}/shop/search?query=${encodeURIComponent(query)}&display=${display}`,
+    {
+      next: { revalidate: 60 }, // 60초마다 갱신 (ISR)
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    }
+  );
+
+  if (!res.ok) throw new Error('상품 검색 실패');
+  return res.json();
 }
 
 // 내 정보 조회 (SSR용 - 토큰 필요)
 // GET /users/me
-export async function getMe(_token: string): Promise<User> {
-  // TODO [실습 4-b]: /users/me 엔드포인트를 호출하세요
-  // - Authorization 헤더에 token 포함: `Bearer ${token}`
-  // - cache: 'no-store' (항상 최신 정보)
-  // - 실패 시: throw new Error('사용자 정보 조회 실패')
-  throw new Error('getMe: 아직 구현되지 않았습니다');
+export async function getMe(token: string): Promise<User> {
+  const res = await fetch(`${BACKEND_URL}/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store', // 항상 최신 정보
+  });
+
+  if (!res.ok) throw new Error('사용자 정보 조회 실패');
+  return res.json();
 }
 
-// 이름으로 유저 검색
+// 이름으로 유저 조회 — 없으면 null 반환
 export async function findUserByName(name: string): Promise<User | null> {
   const res = await fetch(
     `${BACKEND_URL}/users/search?name=${encodeURIComponent(name)}`,
     { cache: 'no-store' }
   );
   if (!res.ok) return null;
-  const page: { content: User[] } = await res.json();
-  return page.content[0] ?? null;
+  const page = await res.json();
+  return page.content?.[0] ?? null;
 }
 
 // 회원가입
@@ -99,29 +107,13 @@ export async function loginUser(userId: number): Promise<{ token: string }> {
   return res.json();
 }
 
-// 주문 목록 조회 (BE 추가 예정)
+// 주문 목록 조회 (SSR용 — 서버에서 BE 직접 호출)
 // GET /orders/me
 export async function getMyOrders(token: string): Promise<Order[]> {
-  // ============================================================
-  // TODO: /orders/me 엔드포인트를 호출하세요 (BE 개발 예정)
-  // 토큰을 Authorization 헤더에 포함하고, cache: 'no-store' 적용
-  // BE 미완성 시 아래 Mock 데이터를 반환하세요
-  // ============================================================
-
-  // BE API 미완성 시 Mock 데이터 (임시)
-  // 실제 구현 시 아래 fetch 코드로 교체
-  console.log('주문 목록 조회 - token:', token.slice(0, 20) + '...');
-  return [
-    { id: 1, productId: 12345, productName: '맥북 Pro 14인치', price: 3200000, quantity: 1, createdAt: new Date().toISOString() },
-    { id: 2, productId: 67890, productName: 'AirPods Pro', price: 350000, quantity: 1, createdAt: new Date().toISOString() },
-  ];
-
-  /* 실제 BE 완성 후 아래 코드로 교체:
   const res = await fetch(`${BACKEND_URL}/orders/me`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
+    cache: 'no-store', // 주문은 사용자마다 다르고 항상 최신이어야 함
   });
   if (!res.ok) throw new Error('주문 목록 조회 실패');
   return res.json();
-  */
 }
