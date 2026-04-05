@@ -1,44 +1,48 @@
-# Step 01: 쿠키에서 JWT 토큰 읽기
+# Step 02: 미들웨어 (proxy.ts) — 라우트 보호
 
-> **브랜치:** `week2/step-01`
-> **수정 파일:** `lib/auth.ts`
+> **브랜치:** `week2/step-02`
+> **수정 파일:** `proxy.ts`
 
 ---
 
 ## 학습 목표
 
-- Next.js App Router에서 서버 컴포넌트가 쿠키를 읽는 방법을 이해한다.
-- `next/headers`의 `cookies()` API 사용법을 익힌다.
-- Week 1의 `localStorage` 방식과 무엇이 다른지 비교한다.
+- Next.js 미들웨어로 인증된 사용자만 특정 페이지에 접근하게 하는 방법을 이해한다.
+- `NextResponse.redirect()`로 서버 측 리다이렉트를 구현한다.
+- `matcher` 설정으로 미들웨어가 실행될 경로를 제어하는 방법을 익힌다.
 
 ---
 
 ## 핵심 개념 설명
 
-### 왜 localStorage 대신 쿠키인가?
+### 왜 미들웨어가 필요한가?
 
-| 항목 | Week 1 (localStorage) | Week 2 (쿠키) |
-|---|---|---|
-| 접근 위치 | 브라우저(클라이언트)만 | 브라우저 + 서버 모두 |
-| 서버 인증 | 불가 | 가능 (요청마다 자동 전송) |
-| 미들웨어 사용 | 불가 | 가능 |
-| XSS 취약점 | 토큰 탈취 가능 | `HttpOnly` 설정으로 방어 가능 |
+클라이언트에서 인증을 체크하면 잠깐이라도 보호된 페이지가 보일 수 있다. 미들웨어는 **요청이 페이지에 도달하기 전에** 서버에서 실행되어 이 문제를 근본적으로 차단한다.
 
-Next.js에서는 **서버 컴포넌트와 미들웨어(proxy.ts)가 쿠키를 읽어야** 하기 때문에 쿠키를 사용한다.
-
-### next/headers의 cookies()
-
-```ts
-import { cookies } from 'next/headers';
-
-const cookieStore = await cookies();
-const token = cookieStore.get('token')?.value;
-//                                   ↑
-//                           없으면 undefined 반환 (optional chaining)
+```
+브라우저 요청 → proxy.ts 실행 → 토큰 확인
+  → 없음: /login 리다이렉트 (페이지 렌더링 없음)
+  → 있음: 요청 통과 → 페이지 렌더링
 ```
 
-- **서버 전용 API**: 클라이언트 컴포넌트에서는 사용 불가
-- `await cookies()`: Next.js 15+에서 비동기로 변경됨
+### Next.js 16의 변경사항
+
+| Next.js 15 이하 | Next.js 16 |
+|---|---|
+| `middleware.ts` | `proxy.ts` |
+| `export function middleware` | `export function proxy` |
+
+동작 방식은 동일하다.
+
+### matcher 설정
+
+```ts
+export const config = {
+  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
+};
+```
+
+이 경로들만 미들웨어가 실행된다. `/`(홈), `/_next/*`(정적 자산) 등은 실행되지 않는다.
 
 ---
 
@@ -46,18 +50,15 @@ const token = cookieStore.get('token')?.value;
 
 ```
 week2-nextjs/
-├── proxy.ts              미들웨어 (라우트 보호)
+├── proxy.ts              📝 이번 Step — 인증 미들웨어
 ├── lib/
-│   ├── auth.ts           📝 이번 Step — 서버 쿠키 인증 헬퍼
-│   ├── auth-server.ts    서버 전용 인증 (auth.ts와 동일 역할, 최신 버전)
-│   └── api.ts            BE API 호출 함수
+│   ├── auth.ts           ✅ Step 01 완성
+│   └── api.ts
 ├── app/
-│   ├── login/page.tsx    로그인 페이지
-│   ├── shop/page.tsx     상품 목록 페이지
-│   ├── cart/page.tsx     장바구니 페이지
-│   └── orders/page.tsx   주문 목록 페이지
+│   ├── login/page.tsx
+│   ├── shop/page.tsx
+│   └── orders/page.tsx
 └── components/
-    └── AddToCartButton.tsx
 ```
 
 ---
@@ -65,20 +66,31 @@ week2-nextjs/
 ## 주요 코드
 
 ```ts
-// lib/auth.ts
+// proxy.ts
 
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function getTokenFromCookie(): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  return cookieStore.get('token')?.value; // ← [실습 1] 완성 후
+export function proxy(request: NextRequest) {
+  const token = request.cookies.get('token')?.value; // ← [실습 2-a]
+  const { pathname } = request.nextUrl;
+  const isLoginPage = pathname === '/login';
+
+  // 미인증 + 보호된 페이지 → /login 리다이렉트
+  if (!token && !isLoginPage) {                      // ← [실습 2-b]
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // 인증됨 + /login 접근 → /shop 리다이렉트
+  if (token && isLoginPage) {                        // ← [실습 2-c]
+    return NextResponse.redirect(new URL('/shop', request.url));
+  }
+
+  return NextResponse.next();
 }
 
-export async function requireAuth(): Promise<string> {
-  const token = await getTokenFromCookie();
-  if (!token) throw new Error('인증이 필요합니다');
-  return token;
-}
+export const config = {
+  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
+};
 ```
 
 ---
@@ -87,26 +99,23 @@ export async function requireAuth(): Promise<string> {
 
 ```bash
 cd week2-nextjs
-cp .env.local.example .env.local   # 최초 1회 (BACKEND_URL 설정)
-npm install                         # 최초 1회
-npm run dev                         # 개발 서버 시작
+npm install
+npm run dev
 ```
 
 브라우저에서 `http://localhost:3000` 접속.
-
-> Next.js는 기본 포트가 3000이다. 백엔드(`localhost:8080`)도 실행 중이어야 한다.
 
 ---
 
 ## 확인할 것들
 
-1. **구현 전:** `/shop` 접속 시 인증 체크가 제대로 동작하지 않는지 확인
-2. **구현 후:** 로그인 → 브라우저 개발자 도구 → Application → Cookies → `token` 쿠키 저장 확인
-3. **서버 로그:** `getTokenFromCookie()` 호출 시 터미널에서 토큰 값 출력되는지 확인
-4. **비교:** Week 1의 `localStorage.getItem('token')`과 코드 구조가 얼마나 유사한지 비교
+1. **구현 전:** `/shop`에 직접 접속해도 리다이렉트 없이 페이지가 열리는지 확인
+2. **구현 후:** 로그아웃 상태에서 `/shop` 직접 입력 → `/login`으로 이동 확인
+3. **구현 후:** 로그인 상태에서 `/login` 직접 입력 → `/shop`으로 이동 확인
+4. **matcher 테스트:** `/`(홈) 접속 시 미들웨어가 실행되지 않음을 확인
 
 ---
 
 ## 핵심 정리
 
-> **서버 컴포넌트는 `next/headers`의 `cookies()`로 쿠키를 직접 읽을 수 있다. `localStorage`는 브라우저에만 존재하지만, 쿠키는 HTTP 요청마다 서버로 자동 전송되어 서버에서도 인증이 가능하다. 이것이 Next.js에서 쿠키를 사용하는 핵심 이유다.**
+> **미들웨어(`proxy.ts`)는 페이지 렌더링 전에 실행되어 인증되지 않은 요청을 차단한다. `matcher`로 실행 범위를 제한하면 정적 자산 요청에는 불필요하게 실행되지 않는다. 이 방식은 클라이언트 리다이렉트보다 보안적으로 우수하다.**
