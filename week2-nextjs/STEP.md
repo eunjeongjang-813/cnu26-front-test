@@ -1,48 +1,50 @@
-# Step 02: 미들웨어 (proxy.ts) — 라우트 보호
+# Step 05: Shop 페이지 — Server Component SSR
 
-> **브랜치:** `week2/step-02`
-> **수정 파일:** `proxy.ts`
+> **브랜치:** `week2/step-05`
+> **수정 파일:** `app/shop/page.tsx`
 
 ---
 
 ## 학습 목표
 
-- Next.js 미들웨어로 인증된 사용자만 특정 페이지에 접근하게 하는 방법을 이해한다.
-- `NextResponse.redirect()`로 서버 측 리다이렉트를 구현한다.
-- `matcher` 설정으로 미들웨어가 실행될 경로를 제어하는 방법을 익힌다.
+- `async` Server Component에서 데이터를 SSR로 가져오는 패턴을 구현한다.
+- `Promise.all()`로 여러 API를 **병렬** 호출하는 방법을 익힌다.
+- `redirect()`로 서버에서 조건부 페이지 이동을 구현한다.
 
 ---
 
 ## 핵심 개념 설명
 
-### 왜 미들웨어가 필요한가?
+### Server Component에서의 데이터 패칭
 
-클라이언트에서 인증을 체크하면 잠깐이라도 보호된 페이지가 보일 수 있다. 미들웨어는 **요청이 페이지에 도달하기 전에** 서버에서 실행되어 이 문제를 근본적으로 차단한다.
+```tsx
+// Week 1 (Client Component)
+useEffect(() => {
+  fetch('/api/shop/search').then(setProducts);
+}, []);
+// → 브라우저에서 실행, 로딩 상태 필요
 
+// Week 2 (Server Component)
+const products = await searchProducts(query);
+// → 서버에서 실행, 완성된 HTML을 브라우저로 전송
+// → 로딩 상태 불필요!
 ```
-브라우저 요청 → proxy.ts 실행 → 토큰 확인
-  → 없음: /login 리다이렉트 (페이지 렌더링 없음)
-  → 있음: 요청 통과 → 페이지 렌더링
-```
 
-### Next.js 16의 변경사항
-
-| Next.js 15 이하 | Next.js 16 |
-|---|---|
-| `middleware.ts` | `proxy.ts` |
-| `export function middleware` | `export function proxy` |
-
-동작 방식은 동일하다.
-
-### matcher 설정
+### Promise.all — 병렬 패칭
 
 ```ts
-export const config = {
-  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
-};
+// ❌ 순차 실행 (느림: 200ms + 300ms = 500ms)
+const user = await getMe(token);       // 200ms
+const products = await searchProducts(query); // 300ms
+
+// ✅ 병렬 실행 (빠름: max(200ms, 300ms) = 300ms)
+const [user, products] = await Promise.all([
+  getMe(token),
+  searchProducts(query),
+]);
 ```
 
-이 경로들만 미들웨어가 실행된다. `/`(홈), `/_next/*`(정적 자산) 등은 실행되지 않는다.
+두 요청이 서로 의존하지 않으면 `Promise.all`로 동시에 시작한다.
 
 ---
 
@@ -50,47 +52,49 @@ export const config = {
 
 ```
 week2-nextjs/
-├── proxy.ts              📝 이번 Step — 인증 미들웨어
+├── proxy.ts              ✅ Step 02 완성
 ├── lib/
 │   ├── auth.ts           ✅ Step 01 완성
-│   └── api.ts
-├── app/
-│   ├── login/page.tsx
-│   ├── shop/page.tsx
-│   └── orders/page.tsx
-└── components/
+│   └── api.ts            ✅ Step 04 완성
+└── app/
+    ├── login/page.tsx    ✅ Step 03 완성
+    ├── shop/
+    │   └── page.tsx      📝 이번 Step — 상품 목록 Server Component
+    └── orders/page.tsx
 ```
 
 ---
 
 ## 주요 코드
 
-```ts
-// proxy.ts
+```tsx
+// app/shop/page.tsx
+// 'use client' 없음 → Server Component (기본값)
 
-import { NextRequest, NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
+import { getTokenFromCookie } from '@/lib/auth-server';
+import { getMe, searchProducts } from '@/lib/api';
 
-export function proxy(request: NextRequest) {
-  const token = request.cookies.get('token')?.value; // ← [실습 2-a]
-  const { pathname } = request.nextUrl;
-  const isLoginPage = pathname === '/login';
+export default async function ShopPage({ searchParams }) {
+  const query = searchParams?.query ?? '맥북';
 
-  // 미인증 + 보호된 페이지 → /login 리다이렉트
-  if (!token && !isLoginPage) {                      // ← [실습 2-b]
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+  // 5-a: 토큰 확인 및 리다이렉트
+  const token = await getTokenFromCookie(); // ← [실습 5-a]
+  if (!token) redirect('/login');           // ← [실습 5-a]
 
-  // 인증됨 + /login 접근 → /shop 리다이렉트
-  if (token && isLoginPage) {                        // ← [실습 2-c]
-    return NextResponse.redirect(new URL('/shop', request.url));
-  }
+  // 5-b: 병렬 데이터 패칭
+  const [user, products] = await Promise.all([ // ← [실습 5-b]
+    getMe(token),
+    searchProducts(query),
+  ]);
 
-  return NextResponse.next();
+  return (
+    <div>
+      <p>안녕하세요, {user.name}님!</p>
+      {products.map((p) => <ProductCard key={p.productId} product={p} />)}
+    </div>
+  );
 }
-
-export const config = {
-  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
-};
 ```
 
 ---
@@ -109,13 +113,13 @@ npm run dev
 
 ## 확인할 것들
 
-1. **구현 전:** `/shop`에 직접 접속해도 리다이렉트 없이 페이지가 열리는지 확인
-2. **구현 후:** 로그아웃 상태에서 `/shop` 직접 입력 → `/login`으로 이동 확인
-3. **구현 후:** 로그인 상태에서 `/login` 직접 입력 → `/shop`으로 이동 확인
-4. **matcher 테스트:** `/`(홈) 접속 시 미들웨어가 실행되지 않음을 확인
+1. **구현 전:** `/shop` 접속 시 사용자 이름이 표시되지 않고 상품도 없음 확인
+2. **구현 후:** 로그인 후 `/shop` → 사용자 이름 + 상품 목록 표시 확인
+3. **페이지 소스 보기:** 상품 목록 HTML이 이미 포함되어 있는지 확인 (SSR 증명)
+4. **Network 탭:** 브라우저에서 BE API 요청이 직접 가지 않는지 확인 (서버에서 호출)
 
 ---
 
 ## 핵심 정리
 
-> **미들웨어(`proxy.ts`)는 페이지 렌더링 전에 실행되어 인증되지 않은 요청을 차단한다. `matcher`로 실행 범위를 제한하면 정적 자산 요청에는 불필요하게 실행되지 않는다. 이 방식은 클라이언트 리다이렉트보다 보안적으로 우수하다.**
+> **Server Component는 `async/await`을 직접 사용해 데이터를 가져온 후 완성된 HTML을 브라우저로 전송한다. `Promise.all`로 독립적인 요청을 병렬 처리하면 응답 시간이 단축된다. Week 1에서 `useEffect`로 처리하던 것을 서버에서 처리하므로 클라이언트에 로딩 상태가 필요 없다.**
