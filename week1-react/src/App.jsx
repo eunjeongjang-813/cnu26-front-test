@@ -4,7 +4,7 @@ import ProductList from './components/ProductList';
 import './index.css';
 
 export default function App() {
-  const { user, isLoggedIn, login, logout } = useAuth();
+  const { user, isLoggedIn, login, register, logout } = useAuth();
 
   return (
     <div className="app">
@@ -25,7 +25,7 @@ export default function App() {
         {isLoggedIn ? (
           <ProductList />
         ) : (
-          <LoginForm onLogin={login} />
+          <LoginForm onLogin={login} onRegister={register} />
         )}
       </main>
     </div>
