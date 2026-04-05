@@ -8,13 +8,13 @@
 // - 쿠키, 환경변수(비밀값)에 안전하게 접근 가능
 // ============================================================
 
-import { redirect } from 'next/navigation';
-import { searchProducts } from '@/lib/api';
-import { getTokenFromCookie, getMe } from '@/lib/auth-server';
-import ProductCard from '@/components/ProductCard';
-import SearchBar from '@/components/SearchBar';
-import LogoutButton from '@/components/LogoutButton';
-import CartCount from '@/components/CartCount';
+import { redirect } from "next/navigation";
+import { searchProducts } from "@/lib/api";
+import { getTokenFromCookie, getMe } from "@/lib/auth-server";
+import ProductCard from "@/components/ProductCard";
+import SearchBar from "@/components/SearchBar";
+import LogoutButton from "@/components/LogoutButton";
+import CartCount from "@/components/CartCount";
 
 // searchParams: URL 쿼리 파라미터 (?query=맥북)
 // Next.js App Router에서 Server Component는 searchParams를 props로 받음
@@ -24,14 +24,15 @@ export default async function ShopPage({
   searchParams: Promise<{ query?: string }>;
 }) {
   const params = await searchParams;
-  const query = params.query ?? '맥북';
+  const query = params.query ?? "맥북";
 
   // ============================================================
   // [실습 5-a] 쿠키에서 토큰을 읽고, 없으면 /login으로 리다이렉트
   // (middleware에서 이미 처리되지만, 방어적으로 한 번 더 체크)
   // ============================================================
   const token = await getTokenFromCookie();
-  if (!token) redirect('/login');
+  5;
+  if (!token) redirect("/login");
 
   // ============================================================
   // [실습 5-b] 병렬로 유저 정보와 상품 목록을 패칭하세요
@@ -39,7 +40,7 @@ export default async function ShopPage({
   // ============================================================
   const [user, products] = await Promise.all([
     getMe(token),
-    searchProducts(query),
+    searchProducts(query, 12, token),
   ]);
 
   return (
