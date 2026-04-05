@@ -1,0 +1,28 @@
+# Dependencies
+**/node_modules/**
+
+# Build outputs
+week1-react/dist/**
+week2-nextjs/.next/**
+week2-nextjs/out/**
+
+# TypeScript build info
+**/*.tsbuildinfo
+
+# Source maps
+**/*.map
+
+# Logs
+**/*.log
+**/npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+
+# Lock files (대용량)
+**/package-lock.json
