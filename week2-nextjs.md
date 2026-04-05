@@ -275,6 +275,8 @@ export default async function ShopPage({ searchParams }) {
     <div>
       <header>
         <span>안녕하세요, {user.name}님!</span>
+        <a href="/orders" className="btn-orders">주문 목록</a>
+        <CartCount />      {/* Client Component — 장바구니 수량 */}
         <LogoutButton />   {/* Client Component — 쿠키 삭제 */}
       </header>
       <SearchBar defaultQuery={query} />  {/* Client Component — 검색 */}
@@ -1703,7 +1705,7 @@ const orders = await getMyOrders(token);
 ```
 # 1주차와 동일
 POST /users              { name, email }    → { id, name, email }
-GET  /users/search       ?name=홍길동      → User[]
+GET  /users/search       ?name=홍길동      → Page<User> (.content[0] 사용)
 POST /users/login        { userId }         → { token }
 GET  /users/me           Authorization      → User
 GET  /shop/search        ?query=&display=   → ShoppingItem[]
