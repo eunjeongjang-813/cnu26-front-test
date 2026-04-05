@@ -17,75 +17,25 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart-context';
 
 export default function CartPage() {
-  // ============================================================
-  // [실습 10-a] useCart로 필요한 값과 함수를 가져오세요
-  //
-  // ✅ 모범 정답:
-  //   const { cart, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
-  //
-  // 📝 해설:
-  //   useCart()는 CartContext에서 만든 커스텀 훅입니다.
-  //   구조 분해 할당으로 필요한 것만 꺼냅니다.
-  //   cart: CartItem 배열 → 화면에 표시
-  //   removeFromCart: 특정 상품 삭제
-  //   updateQuantity: 수량 변경
-  //   clearCart: 전체 비우기 (결제 완료 후 호출)
-  //   totalPrice: 총 금액 (cart에서 파생된 계산값)
-  // ============================================================
-  const { cart, removeFromCart, updateQuantity, clearCart, totalPrice } =
-    useCart(); // TODO
+  // TODO [실습 10-a]: useCart로 필요한 값과 함수를 가져오세요
+  // const { cart, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
+  const cart: { productId: string; productName: string; price: number; image: string; quantity: number; }[] = [];
+  const removeFromCart = (_id: string) => {};
+  const updateQuantity = (_id: string, _qty: number) => {};
+  const clearCart = () => {};
+  const totalPrice = 0;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // ============================================================
-  // [실습 10-b] 결제 핸들러를 구현하세요
-  //
-  // ✅ 모범 정답:
-  //   const handleCheckout = async () => {
-  //     setLoading(true);
-  //     setError(null);
-  //     try {
-  //       const res = await fetch('/api/checkout', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ items: cart }),
-  //       });
-  //       if (!res.ok) throw new Error('결제 처리 중 오류가 발생했습니다');
-  //       clearCart();
-  //       router.push('/orders');
-  //     } catch (err) {
-  //       setError(err instanceof Error ? err.message : '결제 실패');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //
-  // 📝 해설:
-  //   fetch('/api/checkout'): Next.js Route Handler 호출 (서버에서 BE로 전달)
-  //   body: JSON.stringify({ items: cart }): 장바구니 전체를 서버로 전송
-  //   clearCart(): 결제 성공 후 장바구니를 비웁니다 (localStorage도 초기화)
-  //   router.push('/orders'): 주문 목록 페이지로 이동
-  //   try/catch/finally: 에러 처리 + 로딩 상태 정리
-  // ============================================================
   const handleCheckout = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cart }),
-      });
-      if (!res.ok) throw new Error('결제 처리 중 오류가 발생했습니다');
-      clearCart();
-      router.push('/orders');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '결제 실패');
-    } finally {
-      setLoading(false);
-    }
+    // TODO [실습 10-b]: 결제 핸들러를 구현하세요
+    // 1. setLoading(true), setError(null)
+    // 2. fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ items: cart }) })
+    // 3. 성공: clearCart() → router.push('/orders')
+    // 4. 실패: setError(...)
+    // 5. finally: setLoading(false)
   };
 
   // 빈 장바구니 상태
