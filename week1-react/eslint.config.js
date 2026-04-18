@@ -27,6 +27,7 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'react/react-in-jsx-scope': 'off',
       'react-hooks/react-compiler': 'off',
+      'react-hooks/set-state-in-effect': 'off',
       'react/prop-types': 'off',
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'no-undef': 'warn',
