@@ -5,3 +5,4 @@ dist/
 build/
 *.env.local
 .env
+package-lock.json
