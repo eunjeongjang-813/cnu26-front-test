@@ -5,7 +5,7 @@ import { findUserByName, signUp, loginWithUserId, getMe } from '../api/auth';
 // App.jsx에서 사용: const { user, isLoggedIn, login, logout } = useAuth();
 export function useAuth() {
 
-
+  const [user, setUser] = useState(null);
   // 앱 시작 시 localStorage에 토큰이 있으면 자동 로그인 복원
   useEffect(() => {
     const token = localStorage.getItem('token');

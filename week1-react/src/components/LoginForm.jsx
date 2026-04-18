@@ -5,6 +5,10 @@ import { useState } from 'react';
 // - 이름 + 이메일 입력 → 신규 회원가입 후 로그인
 export default function LoginForm({ onLogin }) {
 
+  const [name, setName] = useState('');  //  이름 string
+  const [email, setEmail] = useState('');  //  이메일 string
+  const [error, setError] = useState();
+
 
   const [loading, setLoading] = useState(false);
   const [needEmail, setNeedEmail] = useState(false);

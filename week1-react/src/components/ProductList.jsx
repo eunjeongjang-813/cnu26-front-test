@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { searchProducts } from "../api/shop";
-import ProductCard from "./ProductCard";
+import { useState, useEffect } from 'react';
+import { searchProducts } from '../api/shop';
+import ProductCard from './ProductCard';
 
-const DEFAULT_QUERY = "맥북";
+const DEFAULT_QUERY = '맥북';
 
 export default function ProductList() {
   const [query, setQuery] = useState(DEFAULT_QUERY);
@@ -36,7 +36,7 @@ export default function ProductList() {
       {!loading && !error && (
         <>
           <p className="result-count">
-            "{query}" 검색 결과 {products.length}개
+            &quot;{query}&quot; 검색 결과 {products.length}개
           </p>
           <div className="product-grid">
             {products.map((product) => (
