@@ -1,6 +1,6 @@
 // 모든 API 요청이 거치는 공통 클라이언트
 // Vite proxy 설정으로 /api/* → http://localhost:8080/* 으로 전달됨
-const BASE_URL = "/api";
+const BASE_URL = '/api';
 
 async function request(path, options = {}) {
   // ============================================================
@@ -17,10 +17,10 @@ async function request(path, options = {}) {
   //   초기값을 null로 두면 토큰 없이도 API 요청이 가능하지만,
   //   인증이 필요한 엔드포인트(/users/me 등)는 서버에서 401 에러를 반환합니다.
   // ============================================================
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   const headers = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     // 토큰이 있을 때만 Authorization 헤더 추가
     // 힌트: 스프레드 연산자와 단축 평가(&&)를 활용하세요
     //
@@ -42,7 +42,7 @@ async function request(path, options = {}) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "API 오류" }));
+    const error = await response.json().catch(() => ({ message: 'API 오류' }));
     throw new Error(error.message ?? `HTTP ${response.status}`);
   }
 
@@ -53,6 +53,6 @@ export const get = (path) => request(path);
 
 export const post = (path, body) =>
   request(path, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(body),
   });
