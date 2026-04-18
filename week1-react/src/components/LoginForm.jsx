@@ -4,25 +4,6 @@ import { useState } from 'react';
 // - 이름만 입력 → 기존 유저 로그인 시도
 // - 이름 + 이메일 입력 → 신규 회원가입 후 로그인
 export default function LoginForm({ onLogin }) {
-  // ============================================================
-  // [실습 5] useState로 아래 3가지 상태를 선언하세요
-  // - name: 이름 입력값 (초기값: 빈 문자열)
-  // - email: 이메일 입력값 (초기값: 빈 문자열)
-  // - error: 오류 메시지 (초기값: null)
-  //
-  // ✅ 모범 정답:
-  //   const [name, setName] = useState('');
-  //   const [email, setEmail] = useState('');
-  //   const [error, setError] = useState(null);
-  //
-  // 📝 해설:
-  //   폼 입력값은 React 상태로 관리해야 입력할 때마다 UI가 즉시 반영됩니다.
-  //   - name, email: 문자열이므로 초기값을 '' (빈 문자열)로 설정합니다.
-  //     null로 설정하면 input의 value={null}이 되어 uncontrolled 경고가 발생합니다.
-  //   - error: 오류가 없을 때는 null, 있을 때는 문자열로 사용하므로 초기값을 null로 설정합니다.
-  //   각 input의 value={name}과 onChange={(e) => setName(e.target.value)}를 연결해야
-  //   React가 입력값을 완전히 제어하는 "제어 컴포넌트"가 됩니다.
-  // ============================================================
   const [name, setName] = useState('');       // TODO
   const [email, setEmail] = useState('');     // TODO
   const [error, setError] = useState(null);   // TODO
@@ -63,27 +44,9 @@ export default function LoginForm({ onLogin }) {
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="name">이름</label>
-            {/* ============================================================
-                [실습 5 - 연결] input의 value와 onChange를 연결하세요
-                힌트: value={name} onChange={(e) => setName(e.target.value)}
-
-                ✅ 모범 정답:
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-
-                📝 해설:
-                  value={name}: React 상태를 input의 표시값으로 연결합니다.
-                  onChange={(e) => setName(e.target.value)}: 사용자가 타이핑할 때마다
-                    e.target.value(현재 input 값)로 상태를 업데이트합니다.
-                  이 두 가지를 모두 연결해야 "제어 컴포넌트"가 됩니다.
-                  value만 연결하고 onChange를 빠뜨리면 input이 읽기 전용이 되어
-                  아무리 타이핑해도 값이 변하지 않습니다.
-                ============================================================ */}
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
               placeholder="예: 홍길동"
               disabled={loading}
             />

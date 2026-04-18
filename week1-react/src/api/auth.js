@@ -14,9 +14,6 @@ export async function signUp(name, email) {
   // body: { name, email }
   // 반환값: { id, name, email }
   //
-  // ✅ 모범 정답:
-  //   return post('/users', { name, email });
-  //
   // 📝 해설:
   //   post()는 client.js에서 정의한 공통 함수로, 내부적으로 fetch를 사용합니다.
   //   첫 번째 인자: API 경로 '/users'
@@ -34,9 +31,6 @@ export async function loginWithUserId(userId) {
   // [실습 2-b] POST /users/login 으로 토큰을 발급받으세요
   // body: { userId }
   // 반환값: { token }
-  //
-  // ✅ 모범 정답:
-  //   return post('/users/login', { userId });
   //
   // 📝 해설:
   //   로그인은 서버에 userId를 보내면 JWT 토큰을 발급받는 방식입니다.

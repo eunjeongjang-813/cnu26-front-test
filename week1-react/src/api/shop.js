@@ -5,8 +5,8 @@ import { get } from './client';
 // 응답: ShoppingItem[] - { title, link, image, lprice, hprice, mallName, productId, brand, ... }
 export async function searchProducts(query, display = 12) {
   // ============================================================
-  // [실습 3] 상품 검색 API를 호출하세요
-  // 힌트: get() 함수와 query parameter를 조합하세요
+  // [실습 3] 상품 검색 API를 호출하세요 
+  // 힌트: get() 함수와 query parameter 조합하세요. display도 함께 추가하세요
   // 힌트: encodeURIComponent()로 한글 인코딩을 처리하세요
   //
   // ✅ 모범 정답:
@@ -20,7 +20,4 @@ export async function searchProducts(query, display = 12) {
   //   display 파라미터는 검색 결과 개수를 조절하며 기본값은 12개입니다.
   //   템플릿 리터럴(``)을 사용해 경로와 파라미터를 깔끔하게 조합합니다.
   // ============================================================
-  // TODO: GET /shop/search?query=...&display=... 를 호출하세요
-  // 힌트: get() 함수와 encodeURIComponent()를 사용하세요
-  // 힌트: return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
 }
