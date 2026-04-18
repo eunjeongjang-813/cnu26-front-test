@@ -8,9 +8,6 @@ export function useAuth() {
   // [실습 4-a] user 상태를 useState로 선언하세요
   // 초기값: null (로그인 전에는 유저 정보가 없음)
   //
-  // ✅ 모범 정답:
-  //   const [user, setUser] = useState(null);
-  //
   // 📝 해설:
   //   useState(null)은 초기값이 null인 상태를 선언합니다.
   //   user가 null이면 "비로그인" 상태, 객체이면 "로그인" 상태로 구분합니다.
@@ -52,11 +49,6 @@ export function useAuth() {
     // 2. localStorage.setItem('token', token) 으로 저장
     // 3. setUser(foundUser) 로 상태 업데이트
     //
-    // ✅ 모범 정답:
-    //   const { token } = await loginWithUserId(foundUser.id);
-    //   localStorage.setItem('token', token);
-    //   setUser(foundUser);
-    //
     // 📝 해설:
     //   loginWithUserId()는 async 함수이므로 await으로 결과를 기다립니다.
     //   반환값 { token }을 구조 분해 할당으로 token 문자열만 꺼냅니다.
@@ -74,12 +66,6 @@ export function useAuth() {
   // [실습 4-c] 로그아웃 함수를 구현하세요
   // 1. localStorage에서 token 제거
   // 2. user 상태를 null로 초기화
-  //
-  // ✅ 모범 정답:
-  //   const logout = () => {
-  //     localStorage.removeItem('token');
-  //     setUser(null);
-  //   };
   //
   // 📝 해설:
   //   로그아웃은 두 가지 작업이 필요합니다.
