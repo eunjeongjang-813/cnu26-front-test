@@ -7,9 +7,6 @@ async function request(path, options = {}) {
   // [실습 1] localStorage에서 토큰을 읽어오세요
   // 힌트: localStorage.getItem('token')
   //
-  // ✅ 모범 정답:
-  //   const token = localStorage.getItem('token');
-  //
   // 📝 해설:
   //   localStorage는 브라우저에 key-value 형태로 데이터를 영구 저장하는 Web API입니다.
   //   getItem('token')으로 이전에 저장한 JWT 토큰을 읽어옵니다.
@@ -23,9 +20,6 @@ async function request(path, options = {}) {
     'Content-Type': 'application/json',
     // 토큰이 있을 때만 Authorization 헤더 추가
     // 힌트: 스프레드 연산자와 단축 평가(&&)를 활용하세요
-    //
-    // ✅ 모범 정답 (아래 주석을 해제하세요):
-    //   ...(token && { Authorization: `Bearer ${token}` }),
     //
     // 📝 해설:
     //   token && { Authorization: `Bearer ${token}` }
