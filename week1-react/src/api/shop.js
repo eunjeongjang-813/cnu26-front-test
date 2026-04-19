@@ -9,9 +9,6 @@ export async function searchProducts(query, display = 12) {
   // 힌트: get() 함수와 query parameter를 조합하세요
   // 힌트: encodeURIComponent()로 한글 인코딩을 처리하세요
   //
-  // ✅ 모범 정답:
-  //   return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
-  //
   // 📝 해설:
   //   get()은 client.js의 공통 함수로 GET 요청을 보냅니다.
   //   encodeURIComponent()는 '맥북' → '%EB%A7%A5%EB%B6%81' 처럼
@@ -20,5 +17,5 @@ export async function searchProducts(query, display = 12) {
   //   display 파라미터는 검색 결과 개수를 조절하며 기본값은 12개입니다.
   //   템플릿 리터럴(``)을 사용해 경로와 파라미터를 깔끔하게 조합합니다.
   // ============================================================
-  return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`); // TODO
+  return get(`/shop/search?query=${encodeURIComponent(query)}&display=${display}`);
 }
