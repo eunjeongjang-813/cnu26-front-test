@@ -1,20 +1,15 @@
-import { useState, useEffect } from "react";
-import { searchProducts } from "../api/shop";
-import ProductCard from "./ProductCard";
+import { useState, useEffect } from 'react';
+import { searchProducts } from '../api/shop';
+import ProductCard from './ProductCard';
 
-const DEFAULT_QUERY = "맥북";
+const DEFAULT_QUERY = '맥북';
 
 export default function ProductList() {
   // ============================================================
-  // [실습 6-a] 아래 3가지 상태를 useState로 선언하세요
+  // [실습 6-a] 아래 3가지 상태를 useState로 선언하세요 (
   // - products: 상품 목록 (초기값: 빈 배열 [])
-  // - loading: 로딩 여부 (초기값: true)
+  // - loading: 로딩 여부 (초기값: false)
   // - error: 오류 메시지 (초기값: null)
-  //
-  // ✅ 모범 정답:
-  //   const [products, setProducts] = useState([]);
-  //   const [loading, setLoading] = useState(true);
-  //   const [error, setError] = useState(null);
   //
   // 📝 해설:
   //   - products: API 응답 배열을 담으므로 초기값을 [] 로 설정합니다.
@@ -23,10 +18,7 @@ export default function ProductList() {
   //     false로 설정하면 데이터 로딩 전에 빈 목록이 잠깐 보이는 깜빡임이 생깁니다.
   //   - error: 오류가 없으면 null, 있으면 오류 메시지 문자열로 사용합니다.
   // ============================================================
-  // TODO [실습 6-a]: 아래 3가지 상태를 useState로 선언하세요
-  // const [products, setProducts] = useState([]); // TODO
-  // const [loading, setLoading] = useState(true); // TODO
-  // const [error, setError] = useState(null); // TODO
+
   const [query, setQuery] = useState(DEFAULT_QUERY);
   const [inputValue, setInputValue] = useState(DEFAULT_QUERY);
 
@@ -36,22 +28,6 @@ export default function ProductList() {
   // - 성공 시: setProducts(data), setLoading(false)
   // - 실패 시: setError(err.message), setLoading(false)
   // - 힌트: 의존성 배열에 query를 넣으세요
-  //
-  // ✅ 모범 정답:
-  //   useEffect(() => {
-  //     setLoading(true);
-  //     setError(null);
-  //
-  //     searchProducts(query)
-  //       .then((data) => {
-  //         setProducts(data);
-  //         setLoading(false);
-  //       })
-  //       .catch((err) => {
-  //         setError(err.message);
-  //         setLoading(false);
-  //       });
-  //   }, [query]);
   //
   // 📝 해설:
   //   useEffect는 컴포넌트가 렌더링된 후 부수 효과(API 호출 등)를 실행합니다.
@@ -64,29 +40,9 @@ export default function ProductList() {
   //   2) searchProducts(query) → API 호출 (Promise 반환)
   //   3) .then(data => ...): 성공 시 데이터로 상태 업데이트 + 로딩 종료
   //   4) .catch(err => ...): 실패 시 오류 메시지 저장 + 로딩 종료
-  //
-  //   async/await 방식으로도 작성 가능합니다:
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         setLoading(true);
-  //         const data = await searchProducts(query);
-  //         setProducts(data);
-  //       } catch (err) {
-  //         setError(err.message);
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
-  //     fetchData();
-  //   }, [query]);
   //   (useEffect의 콜백은 직접 async 함수가 될 수 없으므로 내부 함수를 선언해서 호출합니다)
   // ============================================================
-  // TODO [실습 6-b]: useEffect를 작성해 상품을 불러오세요
-  // useEffect(() => {
-  //   ...
-  // }, [query]);
-
+  
   const handleSearch = (e) => {
     e.preventDefault();
     if (inputValue.trim()) {
@@ -114,7 +70,7 @@ export default function ProductList() {
       {!loading && !error && (
         <>
           <p className="result-count">
-            "{query}" 검색 결과 {products.length}개
+            {query} 검색 결과 {products.length}개
           </p>
           <div className="product-grid">
             {products.map((product) => (

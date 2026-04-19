@@ -5,15 +5,7 @@ import { useState } from 'react';
 // - 이름 + 이메일 입력 → 신규 회원가입 후 로그인
 export default function LoginForm({ onLogin }) {
   // ============================================================
-  // [실습 5] useState로 아래 3가지 상태를 선언하세요
-  // - name: 이름 입력값 (초기값: 빈 문자열)
-  // - email: 이메일 입력값 (초기값: 빈 문자열)
-  // - error: 오류 메시지 (초기값: null)
-  //
-  // ✅ 모범 정답:
-  //   const [name, setName] = useState('');
-  //   const [email, setEmail] = useState('');
-  //   const [error, setError] = useState(null);
+  // [실습 5] useState로 아래 3가지 상태를 선언하세요 (name, email, error)
   //
   // 📝 해설:
   //   폼 입력값은 React 상태로 관리해야 입력할 때마다 UI가 즉시 반영됩니다.
@@ -23,9 +15,9 @@ export default function LoginForm({ onLogin }) {
   //   각 input의 value={name}과 onChange={(e) => setName(e.target.value)}를 연결해야
   //   React가 입력값을 완전히 제어하는 "제어 컴포넌트"가 됩니다.
   // ============================================================
-  const [name, setName] = useState('');       // TODO
-  const [email, setEmail] = useState('');     // TODO
-  const [error, setError] = useState(null);   // TODO
+  const [name, setName] = useState('');       
+  const [email, setEmail] = useState('');     
+  const [error, setError] = useState(null);   
   const [loading, setLoading] = useState(false);
   const [needEmail, setNeedEmail] = useState(false);
 
@@ -65,12 +57,8 @@ export default function LoginForm({ onLogin }) {
             <label htmlFor="name">이름</label>
             {/* ============================================================
                 [실습 5 - 연결] input의 value와 onChange를 연결하세요
-                힌트: value={name} onChange={(e) => setName(e.target.value)}
-
-                ✅ 모범 정답:
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-
+                힌트: value={name} onChange={(e) => setName(e.target.value)}    
+                
                 📝 해설:
                   value={name}: React 상태를 input의 표시값으로 연결합니다.
                   onChange={(e) => setName(e.target.value)}: 사용자가 타이핑할 때마다
