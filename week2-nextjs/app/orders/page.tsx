@@ -12,17 +12,14 @@ import { getMyOrders } from '@/lib/api';
 import { getTokenFromCookie } from '@/lib/auth-server';
 
 export default async function OrdersPage() {
-  // ============================================================
-  // [실습 7-a] 토큰을 읽어오고, 없으면 /login으로 리다이렉트
-  // ============================================================
-  const token = await getTokenFromCookie(); // TODO
-  if (!token) redirect('/login');
+  // TODO [실습 7-a]: 토큰을 읽어오고, 없으면 /login으로 리다이렉트
+  // const token = await getTokenFromCookie();
+  // if (!token) redirect('/login');
+  const token = 'placeholder'; // TODO: 위 코드로 교체하세요
 
-  // ============================================================
-  // [실습 7-b] 주문 목록을 가져오세요
-  // getMyOrders(token) 호출 (lib/api.ts에서 구현)
-  // ============================================================
-  const orders = await getMyOrders(token); // TODO
+  // TODO [실습 7-b]: 주문 목록을 가져오세요
+  // const orders = await getMyOrders(token);
+  const orders: { id: number; productId: number; productName: string; price: number; quantity: number; createdAt: string; }[] = []; // TODO: 실제 구현으로 교체
 
   return (
     <div>
