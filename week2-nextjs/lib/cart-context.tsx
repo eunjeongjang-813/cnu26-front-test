@@ -18,7 +18,6 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
   useCallback,
 } from 'react';
 
@@ -46,54 +45,14 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 // ─── Provider ───────────────────────────────────────────────
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  // ============================================================
-  // [실습 8-a] localStorage에서 장바구니 초기값을 불러오세요
-  //
-  // ✅ 모범 정답:
-  //   const [cart, setCart] = useState<CartItem[]>(() => {
-  //     if (typeof window === 'undefined') return [];
-  //     try {
-  //       const saved = localStorage.getItem('cart');
-  //       return saved ? JSON.parse(saved) : [];
-  //     } catch {
-  //       return [];
-  //     }
-  //   });
-  //
-  // 📝 해설:
-  //   useState의 초기화 함수(lazy initializer)를 사용합니다.
-  //   () => ... 형태로 전달하면 컴포넌트가 처음 마운트될 때 한 번만 실행됩니다.
-  //   typeof window === 'undefined': SSR(서버) 환경에서는 localStorage가 없으므로 체크합니다.
-  //   JSON.parse: localStorage에는 문자열만 저장되므로 파싱이 필요합니다.
-  //   1주차의 localStorage.getItem('token')과 같은 패턴 — 브라우저 저장소에서 복원.
-  // ============================================================
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const saved = localStorage.getItem('cart');
-      return saved ? (JSON.parse(saved) as CartItem[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  // TODO [실습 8-a]: localStorage에서 장바구니 초기값을 불러오세요
+  // useState의 lazy initializer 패턴 사용: useState(() => { ... })
+  // - typeof window === 'undefined' 체크 (SSR 환경)
+  // - localStorage.getItem('cart') → JSON.parse
+  const [cart, setCart] = useState<CartItem[]>([]); // TODO: lazy initializer로 교체
 
-  // ============================================================
-  // [실습 8-b] cart가 바뀔 때마다 localStorage에 저장하세요
-  //
-  // ✅ 모범 정답:
-  //   useEffect(() => {
-  //     localStorage.setItem('cart', JSON.stringify(cart));
-  //   }, [cart]);
-  //
-  // 📝 해설:
-  //   cart 상태가 바뀔 때마다 localStorage에 직렬화해서 저장합니다.
-  //   JSON.stringify: 객체/배열 → 문자열 변환 (localStorage는 문자열만 저장)
-  //   의존성 배열 [cart]: cart가 바뀔 때만 실행 (1주차 useEffect와 동일 패턴)
-  //   새로고침해도 위의 useState 초기화 함수에서 이 값을 읽어 복원됩니다.
-  // ============================================================
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  // TODO [실습 8-b]: cart가 바뀔 때마다 localStorage에 저장하세요
+  // useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
 
   // ─── 장바구니 추가 ──────────────────────────────────────
   // 이미 있는 상품 → quantity +1 / 없으면 quantity: 1로 새로 추가
