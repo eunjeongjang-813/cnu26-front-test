@@ -1,48 +1,45 @@
-# Step 02: 미들웨어 (proxy.ts) — 라우트 보호
+# Step 03: 로그인 페이지 — Client Component
 
-> **브랜치:** `week2/step-02`
-> **수정 파일:** `proxy.ts`
+> **브랜치:** `week2/step-03`
+> **수정 파일:** `app/login/page.tsx`
 
 ---
 
 ## 학습 목표
 
-- Next.js 미들웨어로 인증된 사용자만 특정 페이지에 접근하게 하는 방법을 이해한다.
-- `NextResponse.redirect()`로 서버 측 리다이렉트를 구현한다.
-- `matcher` 설정으로 미들웨어가 실행될 경로를 제어하는 방법을 익힌다.
+- 언제 `'use client'`를 선언해야 하는지 이해한다.
+- Next.js에서 `localStorage` 대신 `document.cookie`로 토큰을 저장하는 이유를 이해한다.
+- Week 1 `LoginForm.jsx`와 Week 2 `login/page.tsx`의 구조를 비교한다.
 
 ---
 
 ## 핵심 개념 설명
 
-### 왜 미들웨어가 필요한가?
+### 언제 'use client'가 필요한가?
 
-클라이언트에서 인증을 체크하면 잠깐이라도 보호된 페이지가 보일 수 있다. 미들웨어는 **요청이 페이지에 도달하기 전에** 서버에서 실행되어 이 문제를 근본적으로 차단한다.
+Next.js App Router의 모든 컴포넌트는 기본적으로 **Server Component**다.
+아래 중 하나라도 해당되면 `'use client'`를 선언해야 한다.
 
-```
-브라우저 요청 → proxy.ts 실행 → 토큰 확인
-  → 없음: /login 리다이렉트 (페이지 렌더링 없음)
-  → 있음: 요청 통과 → 페이지 렌더링
-```
-
-### Next.js 16의 변경사항
-
-| Next.js 15 이하 | Next.js 16 |
+| 필요한 경우 | 예시 |
 |---|---|
-| `middleware.ts` | `proxy.ts` |
-| `export function middleware` | `export function proxy` |
+| React 상태 | `useState`, `useReducer` |
+| 생명주기 | `useEffect` |
+| 이벤트 핸들러 | `onClick`, `onSubmit` |
+| 브라우저 API | `document`, `window`, `localStorage` |
 
-동작 방식은 동일하다.
+로그인 페이지는 폼 입력(`useState`) + 제출 핸들러(`onSubmit`) → **Client Component 필요**.
 
-### matcher 설정
+### 왜 document.cookie를 쓰는가?
 
 ```ts
-export const config = {
-  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
-};
+// ❌ localStorage — 브라우저 전용, 서버에서 읽기 불가
+localStorage.setItem('token', token);
+
+// ✅ 쿠키 — 브라우저 + 서버 모두 접근 가능
+document.cookie = `token=${token}; path=/; max-age=3600`;
 ```
 
-이 경로들만 미들웨어가 실행된다. `/`(홈), `/_next/*`(정적 자산) 등은 실행되지 않는다.
+쿠키를 설정하면 이후 모든 HTTP 요청에 자동으로 포함되어 `proxy.ts`와 서버 컴포넌트에서 읽을 수 있다.
 
 ---
 
@@ -50,48 +47,54 @@ export const config = {
 
 ```
 week2-nextjs/
-├── proxy.ts              📝 이번 Step — 인증 미들웨어
+├── proxy.ts              ✅ Step 02 완성
 ├── lib/
 │   ├── auth.ts           ✅ Step 01 완성
 │   └── api.ts
-├── app/
-│   ├── login/page.tsx
-│   ├── shop/page.tsx
-│   └── orders/page.tsx
-└── components/
+└── app/
+    ├── login/
+    │   └── page.tsx      📝 이번 Step — 로그인 폼 Client Component
+    ├── shop/page.tsx
+    └── orders/page.tsx
 ```
 
 ---
 
 ## 주요 코드
 
-```ts
-// proxy.ts
+```tsx
+// app/login/page.tsx
 
-import { NextRequest, NextResponse } from 'next/server';
+'use client'; // ← useState, 이벤트 핸들러 사용 선언
 
-export function proxy(request: NextRequest) {
-  const token = request.cookies.get('token')?.value; // ← [실습 2-a]
-  const { pathname } = request.nextUrl;
-  const isLoginPage = pathname === '/login';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-  // 미인증 + 보호된 페이지 → /login 리다이렉트
-  if (!token && !isLoginPage) {                      // ← [실습 2-b]
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+export default function LoginPage() {
+  const router = useRouter();
+  const [name, setName] = useState('');       // ← [실습 3-a]
+  const [email, setEmail] = useState('');     // ← [실습 3-a]
+  const [error, setError] = useState<string | null>(null); // ← [실습 3-a]
 
-  // 인증됨 + /login 접근 → /shop 리다이렉트
-  if (token && isLoginPage) {                        // ← [실습 2-c]
-    return NextResponse.redirect(new URL('/shop', request.url));
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // ... 로그인 로직 ...
+    const { token } = await loginUser(user.id);
+    document.cookie = `token=${token}; path=/; max-age=3600`; // ← [실습 3-b]
+    router.push('/shop');
+  };
 
-  return NextResponse.next();
+  return <form onSubmit={handleSubmit}>...</form>;
 }
-
-export const config = {
-  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
-};
 ```
+
+**Week 1 vs Week 2 비교:**
+
+| | Week 1 (LoginForm.jsx) | Week 2 (login/page.tsx) |
+|---|---|---|
+| 토큰 저장 | `localStorage.setItem(...)` | `document.cookie = ...` |
+| 페이지 이동 | props 콜백 | `router.push('/shop')` |
+| 파일 구조 | 컴포넌트 폴더 | App Router 페이지 |
 
 ---
 
@@ -109,13 +112,13 @@ npm run dev
 
 ## 확인할 것들
 
-1. **구현 전:** `/shop`에 직접 접속해도 리다이렉트 없이 페이지가 열리는지 확인
-2. **구현 후:** 로그아웃 상태에서 `/shop` 직접 입력 → `/login`으로 이동 확인
-3. **구현 후:** 로그인 상태에서 `/login` 직접 입력 → `/shop`으로 이동 확인
-4. **matcher 테스트:** `/`(홈) 접속 시 미들웨어가 실행되지 않음을 확인
+1. **구현 전:** 로그인 폼에 타이핑해도 값이 안 바뀌는지 확인
+2. **구현 후:** 로그인 성공 → Application → Cookies → `token` 쿠키 저장 확인
+3. **비교:** Week 1의 `LoginForm.jsx`와 이 파일의 구조가 어떻게 유사한지 확인
+4. **`'use client'` 제거 후** 어떤 에러가 발생하는지 실험
 
 ---
 
 ## 핵심 정리
 
-> **미들웨어(`proxy.ts`)는 페이지 렌더링 전에 실행되어 인증되지 않은 요청을 차단한다. `matcher`로 실행 범위를 제한하면 정적 자산 요청에는 불필요하게 실행되지 않는다. 이 방식은 클라이언트 리다이렉트보다 보안적으로 우수하다.**
+> **`'use client'`는 Server Component가 기본인 Next.js에서 브라우저 기능이 필요한 컴포넌트임을 선언한다. 토큰을 `document.cookie`로 저장하면 이후 요청마다 서버에 자동 전송되어 `proxy.ts`와 서버 컴포넌트가 인증을 처리할 수 있다.**
