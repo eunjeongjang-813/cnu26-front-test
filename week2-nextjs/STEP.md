@@ -1,48 +1,46 @@
-# Step 02: 미들웨어 (proxy.ts) — 라우트 보호
+# Step 09: 장바구니 담기 버튼 — useCart 훅
 
-> **브랜치:** `week2/step-02`
-> **수정 파일:** `proxy.ts`
+> **브랜치:** `week2/step-09`
+> **수정 파일:** `components/AddToCartButton.tsx`
 
 ---
 
 ## 학습 목표
 
-- Next.js 미들웨어로 인증된 사용자만 특정 페이지에 접근하게 하는 방법을 이해한다.
-- `NextResponse.redirect()`로 서버 측 리다이렉트를 구현한다.
-- `matcher` 설정으로 미들웨어가 실행될 경로를 제어하는 방법을 익힌다.
+- 커스텀 훅(`useCart`)으로 Context 값을 꺼내 쓰는 방법을 익힌다.
+- 클릭 이벤트 후 `setTimeout`으로 일시적 UI 변화를 구현한다.
+- Client Component에서 Context를 사용하기 위한 조건을 이해한다.
 
 ---
 
 ## 핵심 개념 설명
 
-### 왜 미들웨어가 필요한가?
-
-클라이언트에서 인증을 체크하면 잠깐이라도 보호된 페이지가 보일 수 있다. 미들웨어는 **요청이 페이지에 도달하기 전에** 서버에서 실행되어 이 문제를 근본적으로 차단한다.
-
-```
-브라우저 요청 → proxy.ts 실행 → 토큰 확인
-  → 없음: /login 리다이렉트 (페이지 렌더링 없음)
-  → 있음: 요청 통과 → 페이지 렌더링
-```
-
-### Next.js 16의 변경사항
-
-| Next.js 15 이하 | Next.js 16 |
-|---|---|
-| `middleware.ts` | `proxy.ts` |
-| `export function middleware` | `export function proxy` |
-
-동작 방식은 동일하다.
-
-### matcher 설정
+### useCart 커스텀 훅
 
 ```ts
-export const config = {
-  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
-};
+// lib/cart-context.tsx 에 정의
+export function useCart(): CartContextValue {
+  const context = useContext(CartContext);
+  if (!context) throw new Error('CartProvider 내부에서만 사용 가능');
+  return context;
+}
 ```
 
-이 경로들만 미들웨어가 실행된다. `/`(홈), `/_next/*`(정적 자산) 등은 실행되지 않는다.
+사용하는 쪽에서는 단 한 줄로 필요한 것을 꺼낼 수 있다:
+
+```ts
+const { addToCart } = useCart(); // 구조 분해 할당으로 필요한 것만
+```
+
+### Client Component가 필요한 이유
+
+| 이유 | 코드 |
+|---|---|
+| Context 사용 | `useCart()` → `useContext()` 내부 사용 |
+| 이벤트 핸들러 | `onClick={handleAddToCart}` |
+| 상태 | `const [added, setAdded] = useState(false)` |
+
+→ 세 가지 모두 `'use client'` 필요.
 
 ---
 
@@ -50,47 +48,44 @@ export const config = {
 
 ```
 week2-nextjs/
-├── proxy.ts              📝 이번 Step — 인증 미들웨어
 ├── lib/
-│   ├── auth.ts           ✅ Step 01 완성
-│   └── api.ts
-├── app/
-│   ├── login/page.tsx
-│   ├── shop/page.tsx
-│   └── orders/page.tsx
+│   └── cart-context.tsx  ✅ Step 08 완성
 └── components/
+    └── AddToCartButton.tsx 📝 이번 Step — 장바구니 담기 버튼
 ```
 
 ---
 
 ## 주요 코드
 
-```ts
-// proxy.ts
+```tsx
+// components/AddToCartButton.tsx
 
-import { NextRequest, NextResponse } from 'next/server';
+'use client';
 
-export function proxy(request: NextRequest) {
-  const token = request.cookies.get('token')?.value; // ← [실습 2-a]
-  const { pathname } = request.nextUrl;
-  const isLoginPage = pathname === '/login';
+import { useState } from 'react';
+import { useCart } from '@/lib/cart-context';
 
-  // 미인증 + 보호된 페이지 → /login 리다이렉트
-  if (!token && !isLoginPage) {                      // ← [실습 2-b]
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+export default function AddToCartButton({ product }) {
+  const { addToCart } = useCart(); // ← [실습 9-a]
+  const [added, setAdded] = useState(false);
 
-  // 인증됨 + /login 접근 → /shop 리다이렉트
-  if (token && isLoginPage) {                        // ← [실습 2-c]
-    return NextResponse.redirect(new URL('/shop', request.url));
-  }
+  const handleAddToCart = () => {   // ← [실습 9-b]
+    addToCart(product);             // Context 상태 업데이트 + localStorage 저장
+    setAdded(true);                 // 버튼 텍스트 변경: "담기 완료 ✓"
+    setTimeout(() => setAdded(false), 1500); // 1.5초 후 원상복귀
+  };
 
-  return NextResponse.next();
+  return (
+    <button
+      onClick={handleAddToCart}
+      className={`btn-add-to-cart ${added ? 'btn-add-to-cart--added' : ''}`}
+      disabled={added}
+    >
+      {added ? '담기 완료 ✓' : '장바구니 담기'}
+    </button>
+  );
 }
-
-export const config = {
-  matcher: ['/shop/:path*', '/cart/:path*', '/orders/:path*', '/login'],
-};
 ```
 
 ---
@@ -109,13 +104,13 @@ npm run dev
 
 ## 확인할 것들
 
-1. **구현 전:** `/shop`에 직접 접속해도 리다이렉트 없이 페이지가 열리는지 확인
-2. **구현 후:** 로그아웃 상태에서 `/shop` 직접 입력 → `/login`으로 이동 확인
-3. **구현 후:** 로그인 상태에서 `/login` 직접 입력 → `/shop`으로 이동 확인
-4. **matcher 테스트:** `/`(홈) 접속 시 미들웨어가 실행되지 않음을 확인
+1. **구현 전:** 장바구니 담기 버튼 클릭 시 아무 반응 없음 확인
+2. **구현 후:** 클릭 → "담기 완료 ✓" → 1.5초 후 원래 텍스트로 복원 확인
+3. **헤더 뱃지:** 담기 클릭 시 장바구니 아이콘 숫자가 즉시 증가하는지 확인 (Context 구독)
+4. **새로고침:** 담은 상품이 localStorage에 저장되어 유지되는지 확인 (Step 08 연동)
 
 ---
 
 ## 핵심 정리
 
-> **미들웨어(`proxy.ts`)는 페이지 렌더링 전에 실행되어 인증되지 않은 요청을 차단한다. `matcher`로 실행 범위를 제한하면 정적 자산 요청에는 불필요하게 실행되지 않는다. 이 방식은 클라이언트 리다이렉트보다 보안적으로 우수하다.**
+> **`useCart()`는 `CartContext`의 값을 꺼내는 커스텀 훅이다. Provider 외부에서 호출하면 즉시 에러를 던져 실수를 방지한다. `setAdded` + `setTimeout`으로 일시적 UI 피드백을 주는 패턴은 버튼, 복사 기능 등 다양한 곳에서 재사용된다.**
